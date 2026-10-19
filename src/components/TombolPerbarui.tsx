@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, X } from "lucide-react";
+import { ChevronDown, RefreshCw, X } from "lucide-react";
 
 type Status = {
   berjalan: boolean; tahap: string; langkah: number; total: number; mulai: string | null; selesai: string | null; oleh: string | null;
@@ -82,11 +82,17 @@ export default function TombolPerbarui({ hp = false }: { hp?: boolean }) {
   if (hp) {
     return (
       <div className="rounded-xl bg-white/5">
-        <button type="button" onClick={() => setBuka(!buka)} aria-expanded={buka} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] text-white/80">
+        <button type="button" onClick={() => setBuka(!buka)} aria-expanded={buka} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] text-white/80 transition-transform duration-150 active:scale-[0.98]">
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/8"><RefreshCw size={18} className={jalan ? "animate-spin" : ""} /></span>
-          <span><span className="block">Perbarui data</span><span className="block text-xs text-white/50">{jalan ? "Sedang berjalan…" : s?.selesai ? `Terakhir ${waktu(s.selesai)}` : "Ambil berita & konflik terbaru"}</span></span>
+          <span className="flex-1"><span className="block">Perbarui data</span><span className="block text-xs text-white/50">{jalan ? "Sedang berjalan…" : s?.selesai ? `Terakhir ${waktu(s.selesai)}` : "Ambil berita & konflik terbaru"}</span></span>
+          <ChevronDown size={18} className={`shrink-0 text-white/50 transition-transform duration-300 ${buka ? "rotate-180" : ""}`} />
         </button>
-        {buka && <div className="mx-3 mb-3 rounded-lg bg-surface p-3 text-ink">{panel}</div>}
+        {/* grid 0fr → 1fr supaya panel mengembang mulus tanpa tinggi tetap */}
+        <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${buka ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`} inert={!buka}>
+          <div className="overflow-hidden">
+            <div className={`mx-3 mb-3 rounded-lg bg-surface p-3 text-ink transition-opacity duration-300 ${buka ? "opacity-100" : "opacity-0"}`}>{panel}</div>
+          </div>
+        </div>
       </div>
     );
   }

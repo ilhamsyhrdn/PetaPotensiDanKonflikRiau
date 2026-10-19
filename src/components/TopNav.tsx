@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
-  AlertTriangle, BarChart3, ChevronDown, ClipboardList, Database, Gem, LayoutDashboard, LogOut, Map as IkonPeta, Menu, MonitorPlay, Network, Newspaper, X,
+  AlertTriangle, BarChart3, ChevronDown, ClipboardList, Database, Gem, LayoutDashboard, LogOut, Map as IkonPeta, MonitorPlay, Network, Newspaper,
 } from "lucide-react";
 import type { Sesi } from "@/lib/types";
 import LogoRiau from "./Logo";
@@ -37,12 +38,14 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
   const [buka, setBuka] = useState<string | null>(null); // dropdown desktop yang terbuka
   const [menuHp, setMenuHp] = useState(false);
   const [tergulir, setTergulir] = useState(false);
+  const [terpasang, setTerpasang] = useState(false);
   const wadah = useRef<HTMLElement>(null);
 
   const aktif = (i: Item) => (i.href === "/" ? path === "/" : (i.cocok ?? [i.href]).some((c) => path.startsWith(c)));
   const grupAktif = (g: Grup) => ("anak" in g ? g.anak.some(aktif) : aktif(g));
 
   useEffect(() => { setBuka(null); setMenuHp(false); }, [path]);
+  useEffect(() => setTerpasang(true), []);
   useEffect(() => {
     const gulir = () => setTergulir(window.scrollY > 8);
     gulir();
@@ -53,12 +56,20 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
     document.addEventListener("keydown", esc);
     return () => { window.removeEventListener("scroll", gulir); document.removeEventListener("mousedown", luar); document.removeEventListener("keydown", esc); };
   }, []);
-  useEffect(() => { document.body.style.overflow = menuHp ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [menuHp]);
+  // kunci gulir di <html>, bukan <body>: html ber-overflow-x clip, jadi overflow body tak lagi diteruskan ke viewport
+  // dan body akan menjadi kontainer gulir sendiri (header sticky ikut tergulir hilang)
+  useEffect(() => {
+    if (!menuHp) return;
+    document.documentElement.style.overflow = "hidden";
+    return () => { document.documentElement.style.overflow = ""; };
+  }, [menuHp]);
 
   const inisial = sesi.nama.split(/\s+/).map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+  let urutan = 0; // urutan muncul tiap baris menu HP (efek bertahap)
+  const baris = () => ({ className: "menu-item", style: { "--i": urutan++ } as React.CSSProperties });
+  const tutup = () => setMenuHp(false);
 
   return (
-    // backdrop-filter membuat header jadi containing block bagi elemen `fixed`, jadi dimatikan saat menu HP terbuka
     <header ref={wadah} className={`sticky top-0 z-50 text-white transition-[background-color,box-shadow] duration-300 ${menuHp ? "bg-navy" : tergulir ? "bg-navy/95 shadow-[0_6px_24px_rgb(10_20_30/0.35)] backdrop-blur-md" : "bg-navy"}`}>
       <div className="mx-auto flex h-[var(--tinggi-nav)] max-w-[2400px] items-center gap-3 px-4 sm:px-6 2xl:px-10">
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
@@ -112,41 +123,54 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
           )}
         </div>
 
-        {/* Tombol menu HP */}
-        <button onClick={() => setMenuHp(!menuHp)} aria-expanded={menuHp} aria-label={menuHp ? "Tutup menu" : "Buka menu"} className="ml-auto grid h-10 w-10 place-items-center rounded-lg hover:bg-white/10 lg:hidden">
-          {menuHp ? <X size={22} /> : <Menu size={22} />}
+        {/* Tombol menu HP: tiga garis berubah jadi tanda silang */}
+        <button onClick={() => setMenuHp(!menuHp)} aria-expanded={menuHp} aria-controls="menu-hp" aria-label={menuHp ? "Tutup menu" : "Buka menu"}
+          className="ml-auto grid h-10 w-10 place-items-center rounded-lg transition-colors hover:bg-white/10 active:bg-white/15 lg:hidden">
+          <span aria-hidden className="relative block h-4 w-5">
+            <span className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-out ${menuHp ? "translate-y-[7px] rotate-45" : ""}`} />
+            <span className={`absolute left-0 top-[7px] h-0.5 rounded-full bg-current transition-all duration-200 ${menuHp ? "w-0 opacity-0" : "w-3.5"}`} />
+            <span className={`absolute left-0 top-[14px] h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-out ${menuHp ? "-translate-y-[7px] -rotate-45" : ""}`} />
+          </span>
         </button>
       </div>
 
-      {/* Menu HP */}
-      {menuHp && (
-        <div className="anim-turun fixed inset-x-0 bottom-0 top-[var(--tinggi-nav)] overflow-y-auto bg-navy px-4 pb-8 pt-2 lg:hidden">
-          <nav aria-label="Menu utama" className="space-y-4">
+      {/* Menu HP lewat portal ke body: backdrop-filter header akan menjadi containing block bagi elemen fixed */}
+      {terpasang && createPortal(
+        <div id="menu-hp" data-buka={menuHp} inert={!menuHp}
+          className="menu-hp fixed inset-x-0 bottom-0 top-[var(--tinggi-nav)] z-40 overflow-y-auto overscroll-contain bg-navy px-4 pb-8 pt-3 text-white lg:hidden">
+          <div aria-hidden className="pola-grid pointer-events-none absolute inset-0" />
+          <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgb(77_171_247/0.22),transparent_65%)]" />
+          <nav aria-label="Menu utama" className="relative space-y-4">
             {MENU.map((g) => "anak" in g ? (
               <div key={g.label}>
-                <p className="px-2 pb-1 font-mono text-[10.5px] uppercase tracking-wider text-white/45">{g.label}</p>
-                {g.anak.map((i) => <LinkHp key={i.href} i={i} on={aktif(i)} />)}
+                <p {...baris()}><span className="block px-2 pb-1 font-mono text-[10.5px] uppercase tracking-wider text-white/45">{g.label}</span></p>
+                {g.anak.map((i) => <div key={i.href} {...baris()}><LinkHp i={i} on={aktif(i)} tutup={tutup} /></div>)}
               </div>
-            ) : <LinkHp key={g.href} i={g} on={aktif(g)} />)}
-            <TombolPerbarui hp />
+            ) : <div key={g.href} {...baris()}><LinkHp i={g} on={aktif(g)} tutup={tutup} /></div>)}
+            <div {...baris()}><TombolPerbarui hp /></div>
           </nav>
-          <div className="mt-6 flex items-center justify-between rounded-xl bg-white/5 px-3 py-3">
-            <span className="flex items-center gap-2.5">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#4dabf7] text-xs font-bold text-navy">{inisial}</span>
-              <span className="leading-tight"><span className="block text-sm font-semibold">{sesi.nama}</span><span className="block text-xs text-white/55">{LABEL_PERAN[sesi.peran]} · {sesi.username}</span></span>
-            </span>
-            <form action="/api/auth/logout" method="post"><button className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm"><LogOut size={15} /> Keluar</button></form>
+          <div {...baris()}>
+            <div className="relative mt-6 flex items-center justify-between rounded-xl bg-white/5 px-3 py-3 ring-1 ring-white/10">
+              <span className="flex items-center gap-2.5">
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-[#4dabf7] text-xs font-bold text-navy">{inisial}</span>
+                <span className="leading-tight"><span className="block text-sm font-semibold">{sesi.nama}</span><span className="block text-xs text-white/55">{LABEL_PERAN[sesi.peran]} · {sesi.username}</span></span>
+              </span>
+              <form action="/api/auth/logout" method="post"><button className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm transition active:scale-95"><LogOut size={15} /> Keluar</button></form>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </header>
   );
 }
 
-function LinkHp({ i, on }: { i: Item; on: boolean }) {
+function LinkHp({ i, on, tutup }: { i: Item; on: boolean; tutup: () => void }) {
   return (
-    <Link href={i.href} aria-current={on ? "page" : undefined} className={`flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] ${on ? "bg-white/12 font-semibold" : "text-white/80 active:bg-white/10"}`}>
-      <span className={`grid h-9 w-9 place-items-center rounded-lg ${on ? "bg-[#4dabf7] text-navy" : "bg-white/8"}`}><i.ikon size={18} /></span>
+    <Link href={i.href} onClick={tutup} aria-current={on ? "page" : undefined}
+      className={`relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-3 text-[15px] transition-[background-color,transform] duration-150 active:scale-[0.98] ${on ? "bg-white/12 font-semibold" : "text-white/80 active:bg-white/10"}`}>
+      {on && <span aria-hidden className="absolute inset-y-2.5 left-0 w-1 rounded-r-full bg-[#4dabf7]" />}
+      <span className={`grid h-9 w-9 place-items-center rounded-lg transition-colors ${on ? "bg-[#4dabf7] text-navy" : "bg-white/8"}`}><i.ikon size={18} /></span>
       <span><span className="block">{i.label}</span>{i.ket && <span className="block text-xs font-normal text-white/50">{i.ket}</span>}</span>
     </Link>
   );
