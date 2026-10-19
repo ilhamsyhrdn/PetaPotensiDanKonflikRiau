@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Database, Koleksi } from "./types";
 import { buatSeed } from "./seed";
+import { dokumenAwal } from "./baseline";
 
 /**
  * Penyimpanan sementara berbasis file JSON (data/db.json).
@@ -19,7 +20,11 @@ let antrean: Promise<unknown> = Promise.resolve();
 export async function bacaDb(): Promise<Database> {
   try {
     const mtime = fs.statSync(FILE).mtimeMs;
-    if (!cache || cache.mtime !== mtime) cache = { mtime, db: JSON.parse(fs.readFileSync(FILE, "utf8")) as Database };
+    if (!cache || cache.mtime !== mtime) {
+      const db = JSON.parse(fs.readFileSync(FILE, "utf8")) as Database;
+      db.dokumen ??= dokumenAwal(); // berkas dari versi sebelum ada daftar dokumen baseline
+      cache = { mtime, db };
+    }
     return cache.db;
   } catch {
     if (cache) return cache.db;
@@ -52,7 +57,8 @@ export function ubahDb<T>(fn: (db: Database) => T): Promise<T> {
 }
 
 export async function resetDb() {
-  await ubahDb((db) => Object.assign(db, buatSeed()));
+  // dokumen baseline diisi manual, bukan dari sumber terbuka, jadi tidak ikut dikembalikan
+  await ubahDb((db) => Object.assign(db, buatSeed(), { dokumen: db.dokumen }));
 }
 
-export const KOLEKSI: Koleksi[] = ["konflik", "potensi", "aktor", "media"];
+export const KOLEKSI: Koleksi[] = ["konflik", "potensi", "aktor", "media", "dokumen"];

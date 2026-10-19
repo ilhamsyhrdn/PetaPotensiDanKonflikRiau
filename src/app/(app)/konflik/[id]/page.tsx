@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { AlertTriangle, ArrowLeft, Lock, MapPin } from "lucide-react";
 import MiniPeta from "@/components/MiniPeta";
 import Bagikan from "@/components/Bagikan";
-import { BeritaMini, DaftarKolom, DaftarRujukan, JudulBagian, KartuSamping, TabelAtribut } from "@/components/Detail";
+import { BeritaMini, DaftarKolom, DaftarRujukan, JudulBagian, KartuSamping, TabelAtribut, TautanGoogleMaps } from "@/components/Detail";
 import { Chip } from "@/components/ui";
 import { bacaDb } from "@/lib/db";
 import { warnaSektorKonflik, warnaStatus, kategoriPotensi } from "@/lib/kategori";
@@ -71,7 +71,7 @@ export default async function DetailKonflik({ params }: { params: Promise<{ id: 
               ["Sektor lain", k.sektorLain],
               ["Luas", k.luasHa !== null ? `${angka(k.luasHa)} Ha` : ""],
               ["Dampak masyarakat", k.dampakJiwa ? `${angka(k.dampakJiwa)} jiwa` : ""],
-              ["Lokasi", <span key="l" className="inline-flex items-center gap-1"><MapPin size={13} className="text-muted" />{labelWilayah(k.wilayahId)} <span className="text-xs text-muted">(presisi {k.presisi})</span></span>],
+              ["Lokasi", <span key="l" className="inline-flex items-center gap-1"><MapPin size={13} className="text-muted" />{labelWilayah(k.wilayahId)} <span className="text-xs text-muted">(presisi {k.presisi})</span> <TautanGoogleMaps koordinat={k.koordinat} /></span>],
               ["Kerahasiaan", <span key="r" className="inline-flex items-center gap-1 rounded bg-[#4dabf7] px-1.5 py-0.5 text-[11px] font-semibold text-white">{k.kerahasiaan !== "Publik" && <Lock size={11} />}{k.kerahasiaan}</span>],
             ]} />
           </div>

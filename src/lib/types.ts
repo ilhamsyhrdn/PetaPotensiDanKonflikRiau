@@ -100,15 +100,34 @@ export type Media = {
   asal: "Google News" | "GDELT" | "Input" | "Contoh";
 };
 
+export type StatusDokumen = "Belum dicari" | "Sedang dicari" | "Tidak tersedia online" | "Sudah diunduh" | "Sudah diinput";
+
+/** Dokumen sekunder untuk baseline wilayah studi (RPJMD, Dalam Angka, Renstra OPD). */
+export type Dokumen = {
+  id: string;
+  judul: string;
+  jenis: string;
+  wilayahId: string;
+  tahun: string; // "2024" atau periode "2021–2026"
+  penerbit: string;
+  status: StatusDokumen;
+  url: string;
+  /** Angka penting yang diambil dari dokumen, mis. { nama: "Jumlah penduduk 2024", nilai: "245.310 jiwa" }. */
+  indikator: { nama: string; nilai: string }[];
+  catatan: string;
+  diperbarui: string;
+};
+
 export type Database = {
   konflik: Konflik[];
   potensi: Potensi[];
   aktor: Aktor[];
   relasi: Relasi[];
   media: Media[];
+  dokumen: Dokumen[];
   log: { waktu: string; oleh: string; aksi: string }[];
   /** Kapan tiap sumber data terbuka terakhir dimuat. */
   meta?: { sumber: { nama: string; url?: string; lisensi?: string; catatan?: string }[]; dimuat: string };
 };
 
-export type Koleksi = "konflik" | "potensi" | "aktor" | "media";
+export type Koleksi = "konflik" | "potensi" | "aktor" | "media" | "dokumen";

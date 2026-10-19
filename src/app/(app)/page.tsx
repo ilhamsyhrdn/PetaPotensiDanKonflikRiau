@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Activity, AlertTriangle, Building2, Gem, Map as IkonPeta, MapPin, MonitorPlay, Newspaper, ThumbsDown, type LucideIcon } from "lucide-react";
+import { Activity, AlertTriangle, Building2, ClipboardList, Gem, Map as IkonPeta, MapPin, MonitorPlay, Newspaper, ThumbsDown, type LucideIcon } from "lucide-react";
 import WilayahFilter from "@/components/WilayahFilter";
 import PetaDashboard from "@/components/PetaDashboard";
 import HeroRiau from "@/components/HeroRiau";
@@ -16,6 +16,7 @@ import { WARNA_SENTIMEN, geserHari, hariIni, indeksSentimen, ringkasSentimen, ta
 import { DESA_STUDI, KABUPATEN, KAB_STUDI, anak, dalamWilayah, getWilayah, labelWilayah, namaLengkap, namaWilayah, rantai } from "@/lib/wilayah";
 import { opsiKonflik, opsiPotensi, titikKonflik, titikPotensi } from "@/lib/titik";
 import type { Konflik } from "@/lib/types";
+import { terkumpul } from "@/lib/baseline";
 
 export const dynamic = "force-dynamic";
 
@@ -433,6 +434,20 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </div>
           </Kartu>
         </div>
+
+        <Link href="/baseline" className="card card-angkat muncul-gulir mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 p-4 sm:p-5">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent"><ClipboardList size={19} /></span>
+          <span className="min-w-0 flex-1 basis-60">
+            <span className="block font-semibold">Data baseline wilayah studi</span>
+            <span className="block text-[13px] leading-snug text-muted">
+              {db.dokumen.filter(terkumpul).length} dari {db.dokumen.length} dokumen (RPJMD, Dalam Angka, Renstra OPD) sudah terkumpul. Peta aktor diperbarui setelah studi social mapping.
+            </span>
+          </span>
+          <span className="flex w-full items-center gap-2 sm:w-56">
+            <span className="h-2 flex-1 overflow-hidden rounded-full bg-bg"><span className="block h-full rounded-full bg-accent" style={{ width: `${pct(db.dokumen.filter(terkumpul).length, db.dokumen.length)}%` }} /></span>
+            <span className="num text-[13px] font-semibold text-accent">{pct(db.dokumen.filter(terkumpul).length, db.dokumen.length)}%</span>
+          </span>
+        </Link>
 
         <p className="mt-8 text-center text-[12.5px] text-muted">
           Sumber: data sekunder, OpenStreetMap, Google News, dan kamus sentimen InSet. Data aktor dan media sosial masih contoh{fokus ? ` · Fokus: ${namaWilayah(fokus.id)}` : ""}.

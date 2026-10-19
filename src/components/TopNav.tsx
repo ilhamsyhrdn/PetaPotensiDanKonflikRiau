@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
-  AlertTriangle, BarChart3, ChevronDown, Database, Gem, LayoutDashboard, LogOut, Map as IkonPeta, Menu, MonitorPlay, Network, Newspaper, X,
+  AlertTriangle, BarChart3, ChevronDown, ClipboardList, Database, Gem, LayoutDashboard, LogOut, Map as IkonPeta, Menu, MonitorPlay, Network, Newspaper, X,
 } from "lucide-react";
 import type { Sesi } from "@/lib/types";
 import LogoRiau from "./Logo";
@@ -22,7 +22,10 @@ const MENU: Grup[] = [
     { href: "/berita", label: "Berita", ket: "Berita online dan catatan tim", ikon: Newspaper },
     { href: "/media", label: "Analitik Media", ket: "Nada berita dan topik yang ramai", ikon: BarChart3 },
   ] },
-  { href: "/aktor", label: "Aktor", ikon: Network },
+  { label: "Studi", ikon: ClipboardList, anak: [
+    { href: "/baseline", label: "Data Baseline", ket: "RPJMD, data statistik, renstra dinas", ikon: ClipboardList },
+    { href: "/aktor", label: "Aktor", ket: "Peta aktor hasil social mapping", ikon: Network },
+  ] },
   { href: "/presentasi", label: "Presentasi", ikon: MonitorPlay },
   { href: "/kelola", label: "Kelola Data", ikon: Database },
 ];

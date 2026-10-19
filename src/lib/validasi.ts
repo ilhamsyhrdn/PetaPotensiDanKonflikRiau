@@ -15,7 +15,7 @@ export function validasi(koleksi: Koleksi, masuk: Record<string, unknown>): Hasi
     const kosong = v === undefined || v === null || (typeof v === "string" && v.trim() === "") || (Array.isArray(v) && v.filter((x) => x !== null && x !== undefined && x !== "").length === 0);
     if (kosong) {
       if (f.wajib) return { ok: false, pesan: `${f.label} wajib diisi.` };
-      out[f.kunci] = f.tipe === "daftar" || f.tipe === "rujukan" ? [] : f.tipe === "angka" || f.tipe === "desimal" ? null : f.tipe === "koordinat" ? undefined : "";
+      out[f.kunci] = f.tipe === "daftar" || f.tipe === "rujukan" || f.tipe === "indikator" ? [] : f.tipe === "angka" || f.tipe === "desimal" ? null : f.tipe === "koordinat" ? undefined : "";
       continue;
     }
     switch (f.tipe) {
@@ -41,6 +41,16 @@ export function validasi(koleksi: Koleksi, masuk: Record<string, unknown>): Hasi
           const tautan = url ?? (/^https?:\/\//.test(nama) ? nama : undefined);
           return { nama: url ? nama : tautan ? new URL(tautan).hostname : nama, ...(tautan && urlSah(tautan) ? { url: tautan } : {}) };
         }); break;
+      case "indikator": {
+        const baris = String(v).split("\n").map((b) => b.trim()).filter(Boolean).slice(0, 60);
+        const salah = baris.find((b) => !b.includes("|"));
+        if (salah) return { ok: false, pesan: `${f.label}: baris "${salah.slice(0, 40)}" belum ada nilainya. Tulis Nama | Nilai.` };
+        out[f.kunci] = baris.map((b) => {
+          const [nama, ...nilai] = b.split("|");
+          return { nama: nama.trim().slice(0, 200), nilai: nilai.join("|").trim().slice(0, 200) };
+        });
+        break;
+      }
       case "url": case "gambar":
         if (!urlSah(String(v).trim())) return { ok: false, pesan: `${f.label} harus berupa tautan http(s) yang valid.` };
         out[f.kunci] = String(v).trim(); break;
@@ -61,6 +71,7 @@ export function validasi(koleksi: Koleksi, masuk: Record<string, unknown>): Hasi
 
 /** Bentuk akhir per koleksi (struktur bertingkat, turunan seperti tahun & presisi). */
 function susun(koleksi: Koleksi, d: Record<string, unknown>): Record<string, unknown> {
+  if (koleksi === "dokumen") return { ...d, diperbarui: new Date().toISOString().slice(0, 10) };
   const w = getWilayah(d.wilayahId as string)!;
   const presisi = d.koordinat ? "titik" : w.level;
   const koordinat = d.koordinat ?? w.koordinat;

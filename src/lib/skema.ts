@@ -1,10 +1,11 @@
 import type { Koleksi } from "./types";
 import { ISU_MEDIA, JENIS_KONFLIK, KATEGORI_POTENSI, SEKTOR_KONFLIK, STATUS_KONFLIK } from "./kategori";
+import { JENIS_DOKUMEN, STATUS_DOKUMEN } from "./baseline";
 
 export type Field = {
   kunci: string;
   label: string;
-  tipe: "teks" | "panjang" | "pilih" | "tanggal" | "angka" | "desimal" | "daftar" | "wilayah" | "koordinat" | "url" | "gambar" | "rujukan";
+  tipe: "teks" | "panjang" | "pilih" | "tanggal" | "angka" | "desimal" | "daftar" | "wilayah" | "koordinat" | "url" | "gambar" | "rujukan" | "indikator";
   opsi?: (string | { nilai: string; label: string })[];
   wajib?: boolean;
   min?: number;
@@ -96,6 +97,21 @@ export const SKEMA: Record<Koleksi, { label: string; tunggal: string; kolom: { k
       { kunci: "wilayahId", label: "Wilayah yang dibicarakan", tipe: "wilayah", level: ["provinsi", "kabupaten", "kecamatan", "desa"], wajib: true, lebar: "penuh" },
     ],
   },
+  dokumen: {
+    label: "Dokumen baseline", tunggal: "dokumen",
+    kolom: [{ kunci: "judul", label: "Judul" }, { kunci: "wilayahId", label: "Wilayah" }, { kunci: "jenis", label: "Jenis" }, { kunci: "tahun", label: "Tahun" }, { kunci: "status", label: "Status" }],
+    field: [
+      { kunci: "judul", label: "Judul dokumen", tipe: "teks", wajib: true, lebar: "penuh" },
+      { kunci: "jenis", label: "Jenis", tipe: "pilih", opsi: [...JENIS_DOKUMEN], wajib: true, lebar: "setengah" },
+      { kunci: "status", label: "Status", tipe: "pilih", opsi: STATUS_DOKUMEN.map((s) => s.nama), wajib: true, lebar: "setengah" },
+      { kunci: "wilayahId", label: "Wilayah", tipe: "wilayah", level: ["kabupaten", "kecamatan", "desa"], wajib: true, lebar: "penuh" },
+      { kunci: "tahun", label: "Tahun / periode", tipe: "teks", lebar: "setengah", bantuan: "Mis. 2024, atau 2021–2026 untuk RPJMD dan Renstra." },
+      { kunci: "penerbit", label: "Penerbit / instansi", tipe: "teks", lebar: "setengah" },
+      { kunci: "url", label: "Tautan unduh", tipe: "url", lebar: "penuh", bantuan: "Tautan ke halaman dokumen atau berkas PDF-nya." },
+      { kunci: "indikator", label: "Angka baseline dari dokumen ini", tipe: "indikator", baris: 6, lebar: "penuh", bantuan: "Satu baris per angka: Nama | Nilai. Mis. Jumlah penduduk 2024 | 245.310 jiwa" },
+      { kunci: "catatan", label: "Catatan", tipe: "panjang", lebar: "penuh" },
+    ],
+  },
 };
 
 /** Ubah data tersimpan (bertingkat) menjadi nilai form datar. */
@@ -103,6 +119,7 @@ export function ratakan(koleksi: Koleksi, item: Record<string, unknown>): Record
   const out: Record<string, unknown> = { ...item };
   const ket = item.keterlibatan as Record<string, string[]> | undefined;
   if (ket) Object.assign(out, ket);
+  if (Array.isArray(item.indikator)) out.indikator = (item.indikator as { nama: string; nilai: string }[]).map((i) => `${i.nama} | ${i.nilai}`).join("\n");
   for (const k of ["sumber", "lampiran"]) {
     if (koleksi !== "media" && Array.isArray(item[k])) out[k] = (item[k] as { nama: string; url?: string }[]).map((r) => (r.url ? `${r.nama} | ${r.url}` : r.nama)).join("\n");
   }
@@ -110,4 +127,4 @@ export function ratakan(koleksi: Koleksi, item: Record<string, unknown>): Record
 }
 
 /** Urutan tab di halaman Kelola Data. */
-export const TAB_KELOLA: Koleksi[] = ["konflik", "potensi", "media", "aktor"];
+export const TAB_KELOLA: Koleksi[] = ["konflik", "potensi", "media", "aktor", "dokumen"];

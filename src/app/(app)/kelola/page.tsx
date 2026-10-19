@@ -30,7 +30,7 @@ export default async function KelolaPage({ searchParams }: { searchParams: Promi
   const semua = (db[koleksi] as unknown as Baris[]).filter((x) => x.level !== "perusahaan");
   const kata = q.toLowerCase();
   const hasil = kata
-    ? semua.filter((x) => `${x.judul ?? ""} ${x.nama ?? ""} ${typeof x.sumber === "string" ? x.sumber : ""} ${labelWilayah(String(x.wilayahId))} ${x.sektor ?? ""} ${x.subkategori ?? ""} ${x.isu ?? ""} ${x.kategori ?? ""}`.toLowerCase().includes(kata))
+    ? semua.filter((x) => `${x.judul ?? ""} ${x.nama ?? ""} ${typeof x.sumber === "string" ? x.sumber : ""} ${labelWilayah(String(x.wilayahId))} ${x.sektor ?? ""} ${x.subkategori ?? ""} ${x.isu ?? ""} ${x.kategori ?? ""} ${x.jenis ?? ""} ${x.penerbit ?? ""} ${x.status ?? ""}`.toLowerCase().includes(kata))
     : semua;
   const halMaks = Math.max(1, Math.ceil(hasil.length / PER_HAL));
   const hal = Math.min(halMaks, Math.max(1, Number(sp.hal) || 1));

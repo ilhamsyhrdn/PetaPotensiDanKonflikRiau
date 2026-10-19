@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin } from "lucide-react";
 import MiniPeta from "@/components/MiniPeta";
 import Bagikan from "@/components/Bagikan";
-import { BeritaMini, DaftarKolom, DaftarRujukan, JudulBagian, KartuSamping, TabelAtribut } from "@/components/Detail";
+import { BeritaMini, DaftarKolom, DaftarRujukan, JudulBagian, KartuSamping, TabelAtribut, TautanGoogleMaps } from "@/components/Detail";
 import { Chip } from "@/components/ui";
 import { bacaDb } from "@/lib/db";
 import { kategoriPotensi, warnaSektorKonflik } from "@/lib/kategori";
@@ -71,7 +71,7 @@ export default async function DetailPotensi({ params }: { params: Promise<{ id: 
               ["Komoditas", p.komoditas.join(", ")],
               ["Status", <span key="s" style={{ color: WARNA_STATUS[p.status] }} className="font-medium">{p.status}</span>],
               ["Pengelola", p.pengelola],
-              ["Lokasi", <span key="l" className="inline-flex items-center gap-1"><MapPin size={13} className="text-muted" />{labelWilayah(p.wilayahId)}</span>],
+              ["Lokasi", <span key="l" className="inline-flex items-center gap-1"><MapPin size={13} className="text-muted" />{labelWilayah(p.wilayahId)} <TautanGoogleMaps koordinat={p.koordinat} /></span>],
               ["Koordinat", `${p.koordinat[1].toFixed(5)}, ${p.koordinat[0].toFixed(5)}`],
               ["Pembaruan data", p.tanggal ? tanggalPanjang(p.tanggal) : ""],
               ["Kerahasiaan", <span key="r" className="rounded bg-[#4dabf7] px-1.5 py-0.5 text-[11px] font-semibold text-white">{p.kerahasiaan}</span>],

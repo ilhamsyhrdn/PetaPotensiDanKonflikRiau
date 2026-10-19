@@ -115,7 +115,7 @@ export default function KelolaData({ koleksi, baris, total, hal, perHal, q, juml
             <input id="cari-data" value={cari} onChange={(e) => setCari(e.target.value)} placeholder="Cari judul, wilayah, sektor…" className="w-full min-w-0 bg-transparent outline-none sm:w-56" />
           </label>
           {bisaUbah && (
-            <button onClick={() => setForm({ mode: "baru", data: { id: "", kerahasiaan: "Publik", tanggal: new Date().toISOString().slice(0, 10), ...(koleksi === "media" ? { tipe: "berita" } : {}), ...(koleksi === "konflik" ? { status: "Belum ditangani" } : {}), ...(koleksi === "potensi" ? { status: "Beroperasi" } : {}) } })}
+            <button onClick={() => setForm({ mode: "baru", data: { id: "", kerahasiaan: "Publik", tanggal: new Date().toISOString().slice(0, 10), ...(koleksi === "media" ? { tipe: "berita" } : {}), ...(koleksi === "konflik" ? { status: "Belum ditangani" } : {}), ...(koleksi === "potensi" ? { status: "Beroperasi" } : {}), ...(koleksi === "dokumen" ? { status: "Belum dicari" } : {}) } })}
               className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#25557a]">
               <Plus size={16} /> <span className="hidden sm:inline">Tambah</span> {skema.tunggal}
             </button>
@@ -182,7 +182,7 @@ export default function KelolaData({ koleksi, baris, total, hal, perHal, q, juml
         {peran === "admin" && (
           <section className="card space-y-2 p-4 text-sm">
             <h2 className="font-semibold">Muat ulang data sumber</h2>
-            <p className="text-muted">Kembalikan semua data ke hasil pengambilan data terbuka terakhir. Hati-hati, data yang diinput manual ikut hilang.</p>
+            <p className="text-muted">Kembalikan semua data ke hasil pengambilan data terbuka terakhir. Hati-hati, data yang diinput manual ikut hilang, kecuali daftar dokumen baseline.</p>
             <p className="text-xs text-muted">Untuk mengambil data terbaru: jalankan <code className="rounded bg-bg px-1">npm run data</code> lalu tekan tombol ini.</p>
             {konfirmasiReset ? (
               <div className="flex gap-2"><button onClick={reset} className="rounded-lg bg-neg px-3 py-1.5 font-semibold text-white">Ya, muat ulang</button><button onClick={() => setKonfirmasiReset(false)} className="rounded-lg border border-line px-3 py-1.5">Batal</button></div>
@@ -252,7 +252,7 @@ function Kontrol({ f, nilai, set, setSibuk }: { f: Field; nilai: Baris; set: (k:
   const id = `f-${f.kunci}`;
   const v = nilai[f.kunci];
   switch (f.tipe) {
-    case "panjang": case "rujukan":
+    case "panjang": case "rujukan": case "indikator":
       return <textarea id={id} rows={f.baris ?? (f.tipe === "rujukan" ? 2 : 3)} className={kelasInput} value={String(v ?? "")} onChange={(e) => set(f.kunci, e.target.value)} />;
     case "pilih":
       return (

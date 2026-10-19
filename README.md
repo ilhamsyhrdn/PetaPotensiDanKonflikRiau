@@ -35,8 +35,10 @@ Butuh koneksi internet untuk citra satelit, peta jalan, dan font label peta.
 | Berita `/berita`, `/berita/[id]` | Daftar berita dengan pencarian, filter, halaman; detail dengan analisis sentimen dan liputan terkait |
 | Analitik Media `/media` | Volume harian, letupan negatif/positif, sentimen per kabupaten, isu, sumber teraktif |
 | Aktor `/aktor` | Sosiogram & matriks pengaruh–kepentingan (DATA CONTOH sampai hasil lapangan tersedia) |
+| Data Baseline `/baseline` | Daftar periksa dokumen sekunder (RPJMD, Kabupaten/Kecamatan Dalam Angka, Renstra OPD) untuk 4 kabupaten & 5 kecamatan studi, status pengumpulan, angka baseline, tahapan studi, dan ekspor KML |
+| Ekspor KML `/api/ekspor/kml?lapisan=baseline,konflik,potensi` | Berkas untuk Google Earth / Google My Maps: wilayah studi + angka baseline, titik konflik, titik potensi (data Rahasia tidak ikut) |
 | Mode Presentasi `/presentasi` | 4 panel ringkasan (umum, konflik, potensi, pemberitaan) lalu popup titik bergantian di peta |
-| Kelola Data `/kelola` | Tambah/ubah/hapus; berita bisa diberi tautan sumber luar, gambar unggahan, dan isi tulisan |
+| Kelola Data `/kelola` | Tambah/ubah/hapus; berita bisa diberi tautan sumber luar, gambar unggahan, dan isi tulisan; tab Dokumen baseline untuk status, tautan unduh, dan angka baseline (format `Nama \| Nilai` per baris) |
 
 **Tampilan.** Navigasi ada di atas (`src/components/TopNav.tsx`): menu tarik-turun di desktop, menu layar penuh di HP.
 Semua halaman responsif sampai lebar 360 px. Di HP, filter dan ringkasan peta muncul sebagai lembar bawah (*bottom sheet*).

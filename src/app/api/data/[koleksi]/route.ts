@@ -5,7 +5,7 @@ import { validasi } from "@/lib/validasi";
 import { SKEMA } from "@/lib/skema";
 import type { Koleksi } from "@/lib/types";
 
-const AWALAN: Record<Koleksi, string> = { konflik: "k-in", potensi: "p-in", aktor: "a", media: "m-in" };
+const AWALAN: Record<Koleksi, string> = { konflik: "k-in", potensi: "p-in", aktor: "a", media: "m-in", dokumen: "d-in" };
 
 export async function POST(req: Request, { params }: { params: Promise<{ koleksi: string }> }) {
   const { koleksi } = await params;
@@ -23,6 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ koleksi
       potensi: { asal: "Input", atribut: {}, tanggal: new Date().toISOString().slice(0, 10) },
       aktor: {},
       media: { asal: "Input" },
+      dokumen: {},
     };
     const baru: Record<string, unknown> = { ...bawaan[k], ...v.data, id };
     if (k === "konflik" && !v.data.nomor) baru.nomor = bawaan.konflik.nomor;

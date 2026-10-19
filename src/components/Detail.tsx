@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ExternalLink, FileText, Newspaper } from "lucide-react";
-import type { Media, Rujukan } from "@/lib/types";
+import type { Koordinat, Media, Rujukan } from "@/lib/types";
 import { WARNA_SENTIMEN, domain, tanggal, tanpaTanahKita } from "@/lib/format";
 import { warnaIsu } from "@/lib/kategori";
 
@@ -41,6 +41,15 @@ export function DaftarKolom({ kolom }: { kolom: [string, string[]][] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+export function TautanGoogleMaps({ koordinat: [x, y] }: { koordinat: Koordinat }) {
+  return (
+    <a href={`https://www.google.com/maps/search/?api=1&query=${y},${x}`} target="_blank" rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-semibold text-accent hover:underline">
+      Google Maps <ExternalLink size={11} />
+    </a>
   );
 }
 

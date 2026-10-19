@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle, Gem } from "lucide-react";
+import { AlertTriangle, Earth, Gem } from "lucide-react";
 import PetaTematik from "@/components/PetaTematik";
 import WilayahFilter from "@/components/WilayahFilter";
 import { bacaDb } from "@/lib/db";
@@ -45,6 +45,10 @@ export default async function PetaPage({ params, searchParams }: { params: Promi
         </div>
         <p className="hidden min-w-0 flex-1 truncate text-xs text-muted xl:block" title={TEMA[tema].ket}>{TEMA[tema].ket}</p>
         <div className="w-full min-w-0 sm:ml-auto sm:w-auto"><Suspense><WilayahFilter penuh /></Suspense></div>
+        <a href={`/api/ekspor/kml?lapisan=${tema}`} download title="Unduh KML untuk dibuka di Google Earth atau Google My Maps"
+          className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-[13px] font-semibold text-muted hover:text-accent md:flex">
+          <Earth size={15} /> Google Earth
+        </a>
       </div>
       <div className="min-h-0 flex-1">
         <PetaTematik key={tema} tema={tema} titik={titik} opsi={opsi} ringkasan={ringkasanPoligon(hitungRingkasan(db))} fokus={w} />

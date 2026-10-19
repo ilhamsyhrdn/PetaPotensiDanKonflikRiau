@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Aktor, Database, Koordinat, Konflik, Media, Potensi, Relasi, Sentimen } from "./types";
 import { getWilayah, rantai } from "./wilayah";
+import { dokumenAwal } from "./baseline";
 
 /**
  * Data awal aplikasi:
@@ -148,6 +149,7 @@ export function buatSeed(): Database {
     aktor: aktor(),
     relasi: relasi(),
     media,
+    dokumen: dokumenAwal(),
     log: [],
     meta: {
       dimuat: new Date().toISOString(),
