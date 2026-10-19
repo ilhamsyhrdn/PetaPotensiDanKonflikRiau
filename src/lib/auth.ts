@@ -4,18 +4,12 @@ import type { Peran, Sesi } from "./types";
 export const COOKIE = "sesi";
 const MASA_BERLAKU = 8 * 60 * 60; // 8 jam
 
-const DEV = process.env.NODE_ENV !== "production";
+// Nilai bawaan ada di repo; isi AUTH_SECRET dan PASSWORD_* di env hosting untuk menggantinya.
+const rahasia = () => new TextEncoder().encode(process.env.AUTH_SECRET || "prototipe-ganti-rahasia-ini-lewat-env");
 
-// Di produksi rahasia dan password wajib dari env; nilai cadangan hanya untuk dev lokal.
-const rahasia = () => {
-  const r = process.env.AUTH_SECRET ?? (DEV ? "rahasia-dev-lokal" : undefined);
-  if (!r) throw new Error("AUTH_SECRET belum diisi");
-  return new TextEncoder().encode(r);
-};
+const pw = (env: string | undefined, bawaan: string) => env || bawaan;
 
-const pw = (env: string | undefined, dev: string) => env || (DEV ? dev : undefined);
-
-const AKUN: { username: string; password: string | undefined; nama: string; peran: Peran }[] = [
+const AKUN: { username: string; password: string; nama: string; peran: Peran }[] = [
   { username: "admin", password: pw(process.env.PASSWORD_ADMIN, "admin123"), nama: "Admin Tim Studi", peran: "admin" },
   { username: "editor", password: pw(process.env.PASSWORD_EDITOR, "editor123"), nama: "Analis Lapangan", peran: "editor" },
   { username: "viewer", password: pw(process.env.PASSWORD_VIEWER, "viewer123"), nama: "Manajemen PHR", peran: "viewer" },

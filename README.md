@@ -11,9 +11,9 @@ npm run dev
 ```
 
 Buka http://localhost:3000 lalu masuk. Ada tiga peran: `admin` (semua akses, termasuk memuat ulang data sumber),
-`editor` (tambah, ubah, hapus data), dan `viewer` (hanya melihat). Password akun dev lokal ada di `src/lib/auth.ts`.
+`editor` (tambah, ubah, hapus data), dan `viewer` (hanya melihat). Password bawaan ada di `src/lib/auth.ts` dan berlaku juga di produksi.
 
-Di produksi (deploy), isi variabel lingkungan berikut. Tanpa itu akun tidak bisa masuk:
+Untuk mengganti password bawaan, isi variabel lingkungan berikut di hosting (nilai env selalu menang):
 
 | Variabel | Isi |
 |---|---|
