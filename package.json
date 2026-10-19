@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "data": "node scripts/data/wilayah.mjs && node scripts/data/siluet.mjs && node scripts/data/konflik.mjs && node scripts/data/potensi.mjs && node scripts/data/berita.mjs",

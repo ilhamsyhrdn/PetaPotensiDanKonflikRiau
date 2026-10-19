@@ -11,7 +11,7 @@ import { opsiKonflik, opsiPotensi, titikKonflik, titikPotensi } from "@/lib/titi
 export const dynamic = "force-dynamic";
 
 const TEMA = {
-  konflik: { judul: "Peta konflik", pendek: "Konflik", ket: "Konflik lahan, lingkungan, dan sosial. Sumbernya TanahKita.id dan berita online.", ikon: AlertTriangle, warna: "#A23A1C" },
+  konflik: { judul: "Peta konflik", pendek: "Konflik", ket: "Konflik lahan, lingkungan, dan sosial. Sumbernya data sekunder dan berita online.", ikon: AlertTriangle, warna: "#A23A1C" },
   potensi: { judul: "Peta potensi ekonomi", pendek: "Potensi ekonomi", ket: "Sarana usaha dari OpenStreetMap, dikelompokkan menurut kategori BPS.", ikon: Gem, warna: "#2F6690" },
 } as const;
 

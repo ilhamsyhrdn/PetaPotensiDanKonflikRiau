@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ExternalLink, FileText, Newspaper } from "lucide-react";
 import type { Media, Rujukan } from "@/lib/types";
-import { WARNA_SENTIMEN, domain, tanggal } from "@/lib/format";
+import { WARNA_SENTIMEN, domain, tanggal, tanpaTanahKita } from "@/lib/format";
 import { warnaIsu } from "@/lib/kategori";
 
 /** Potongan tampilan bersama halaman detail konflik, potensi, dan berita. */
@@ -44,7 +44,8 @@ export function DaftarKolom({ kolom }: { kolom: [string, string[]][] }) {
   );
 }
 
-export function DaftarRujukan({ list, kosong }: { list: Rujukan[]; kosong: string }) {
+export function DaftarRujukan({ list: semua, kosong }: { list: Rujukan[]; kosong: string }) {
+  const list = tanpaTanahKita(semua);
   if (!list.length) return <p className="text-sm text-muted">{kosong}</p>;
   return (
     <ul className="space-y-1.5 text-sm">

@@ -10,13 +10,17 @@ npm install
 npm run dev
 ```
 
-Buka http://localhost:3000 lalu masuk dengan akun demo:
+Buka http://localhost:3000 lalu masuk. Ada tiga peran: `admin` (semua akses, termasuk memuat ulang data sumber),
+`editor` (tambah, ubah, hapus data), dan `viewer` (hanya melihat). Password akun dev lokal ada di `src/lib/auth.ts`.
 
-| Username | Password | Peran |
-|---|---|---|
-| admin | admin123 | Semua akses, termasuk memuat ulang data sumber |
-| editor | editor123 | Tambah, ubah, hapus data |
-| viewer | viewer123 | Hanya melihat |
+Di produksi (deploy), isi variabel lingkungan berikut. Tanpa itu akun tidak bisa masuk:
+
+| Variabel | Isi |
+|---|---|
+| `AUTH_SECRET` | String acak panjang untuk menandatangani sesi (mis. hasil `openssl rand -base64 32`) |
+| `PASSWORD_ADMIN` | Password akun `admin` |
+| `PASSWORD_EDITOR` | Password akun `editor` |
+| `PASSWORD_VIEWER` | Password akun `viewer` |
 
 Butuh koneksi internet untuk citra satelit, peta jalan, dan font label peta.
 
@@ -27,7 +31,7 @@ Butuh koneksi internet untuk citra satelit, peta jalan, dan font label peta.
 | Dashboard `/` | Angka kunci, peta ringkas (konflik/potensi), tren berita mingguan, tabel 12 kabupaten/kota, sektor & status konflik, berita terbaru |
 | Peta Konflik `/peta/konflik` | Titik konflik berwarna menurut sektor, filter sektor/status/tahun/asal data, kepadatan per wilayah, klik titik → detail |
 | Peta Potensi Ekonomi `/peta/potensi` | Titik potensi menurut lapangan usaha BPS (KBLI), filter kategori, kepadatan per wilayah |
-| Detail `/konflik/[id]`, `/potensi/[id]` | Format "data detil" ala TanahKita: mini peta, atribut, keterlibatan, narasi, sumber, lampiran, data sekitar |
+| Detail `/konflik/[id]`, `/potensi/[id]` | Format "data detil": mini peta, atribut, keterlibatan, narasi, sumber, lampiran, data sekitar |
 | Berita `/berita`, `/berita/[id]` | Daftar berita dengan pencarian, filter, halaman; detail dengan analisis sentimen dan liputan terkait |
 | Analitik Media `/media` | Volume harian, letupan negatif/positif, sentimen per kabupaten, isu, sumber teraktif |
 | Aktor `/aktor` | Sosiogram & matriks pengaruh–kepentingan (DATA CONTOH sampai hasil lapangan tersedia) |
@@ -77,7 +81,7 @@ src/components/        Komponen halaman
 ## Belum ada / langkah berikutnya
 
 - Database PostgreSQL + PostGIS (`src/lib/db.ts` satu-satunya titik yang perlu diganti) dan paket Docker.
-- Login dengan tabel pengguna & password ter-hash (sekarang akun demo di `src/lib/auth.ts`); isi `AUTH_SECRET` di `.env.local`.
+- Login dengan tabel pengguna & password ter-hash (sekarang tiga akun tetap dengan password dari env, lihat `src/lib/auth.ts`).
 - Import Excel/GeoJSON dan hasil formulir lapangan.
 - Sumber berita yang lisensinya jelas untuk pemakaian kantor (RSS resmi media, GDELT dengan kuota, atau layanan berbayar).
 - Penyamaran nama orang pada narasi konflik dan judul berita sebelum dibuka ke pengguna lebih luas (UU PDP).

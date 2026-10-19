@@ -1,4 +1,3 @@
-import { AKUN_DEMO, LABEL_PERAN } from "@/lib/auth";
 import { DESA_STUDI, KABUPATEN, WILAYAH } from "@/lib/wilayah";
 import siluet from "@/data/riau-siluet.json";
 import Logo from "@/components/Logo";
@@ -65,17 +64,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <LoginForm lanjut={lanjut} />
 
           <div className="rounded-xl border border-dashed border-line bg-surface p-4 text-sm">
-            <p className="font-semibold">Akun demo prototipe</p>
-            <ul className="mt-2 space-y-1 text-muted">
-              {AKUN_DEMO.map((a) => (
-                <li key={a.username} className="flex justify-between gap-3 font-mono text-[13px]">
-                  <span>{a.username} / {a.password}</span>
-                  <span className="text-ink">{LABEL_PERAN[a.peran]}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3 text-xs leading-relaxed text-muted">
-              Konflik, potensi, dan berita diambil dari sumber terbuka (TanahKita, OpenStreetMap, Google News, GDELT). Data aktor dan media sosial masih contoh.
+            <p className="text-xs leading-relaxed text-muted">
+              Konflik, potensi, dan berita diambil dari sumber terbuka (OpenStreetMap, Google News, GDELT, dan data sekunder). Data aktor dan media sosial masih contoh.
             </p>
           </div>
         </div>

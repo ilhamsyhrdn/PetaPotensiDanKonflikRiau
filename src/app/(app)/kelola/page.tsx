@@ -4,6 +4,7 @@ import { TAB_KELOLA } from "@/lib/skema";
 import { bacaDb } from "@/lib/db";
 import { wajibSesi } from "@/lib/sesi";
 import { labelWilayah } from "@/lib/wilayah";
+import { labelAsal, tanpaTanahKita } from "@/lib/format";
 import type { Koleksi } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,12 @@ export const metadata = { title: "Kelola Data · Dashboard Potensi Ekonomi & Pet
 
 const PER_HAL = 50;
 type Baris = Record<string, unknown> & { id: string };
+
+const bersihkan = (b: Baris): Baris => ({
+  ...b,
+  ...(typeof b.asal === "string" ? { asal: labelAsal(b.asal) } : {}),
+  ...(Array.isArray(b.sumber) ? { sumber: tanpaTanahKita(b.sumber) } : {}),
+});
 
 export default async function KelolaPage({ searchParams }: { searchParams: Promise<{ tab?: string; q?: string; hal?: string }> }) {
   const sesi = await wajibSesi();
@@ -34,7 +41,7 @@ export default async function KelolaPage({ searchParams }: { searchParams: Promi
       <HeaderHalaman eyebrow="Khusus admin & editor" judul="Kelola data"
         keterangan="Tambah, ubah, atau hapus data. Begitu disimpan, perubahannya langsung muncul di peta, dashboard, dan presentasi." />
       <div className="mx-auto max-w-[2400px] px-4 py-4 sm:px-6 2xl:px-10">
-        <KelolaData key={koleksi} koleksi={koleksi} baris={hasil.slice((hal - 1) * PER_HAL, hal * PER_HAL)} total={hasil.length} hal={hal} perHal={PER_HAL} q={q}
+        <KelolaData key={koleksi} koleksi={koleksi} baris={hasil.slice((hal - 1) * PER_HAL, hal * PER_HAL).map(bersihkan)} total={hasil.length} hal={hal} perHal={PER_HAL} q={q}
           jumlah={jumlah} log={db.log.slice(0, 10)} peran={sesi.peran} />
       </div>
     </>

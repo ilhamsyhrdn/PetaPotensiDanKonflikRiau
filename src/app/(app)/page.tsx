@@ -231,7 +231,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <div className="mx-auto max-w-[2400px] px-4 pb-10 sm:px-6 2xl:px-10">
         <div className="relative z-10 -mt-16 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
           <KartuAngka label="Konflik tercatat" nilai={konflik.length} ikon={AlertTriangle} warna="#c2410c" tren={konflikPerBulan} href="/peta/konflik"
-            ket={`${konflik.filter((k) => k.asal === "TanahKita").length} dari TanahKita, ${konflik.filter((k) => k.asal === "Berita").length} dari berita`} />
+            ket={`${konflik.filter((k) => k.asal === "TanahKita").length} dari data sekunder, ${konflik.filter((k) => k.asal === "Berita").length} dari berita`} />
           <KartuAngka label="Masih berjalan" nilai={aktif} ikon={Activity} warna="#e8590c" href="/peta/konflik" komposisi={statusData}
             ket={`${belum} belum ditangani, ${perStatus["Dalam proses"] ?? 0} sedang diproses`} />
           <KartuAngka label="Titik potensi ekonomi" nilai={potensi.length} ikon={Gem} warna="#2f6690" href="/peta/potensi" komposisi={katData}
@@ -272,7 +272,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         {/* KONFLIK */}
-        <JudulSeksi id="konflik" ikon={AlertTriangle} warna="#c2410c" judul="Konflik" sub={`${konflik.length} kasus dari TanahKita.id dan berita online`} aksi={<TautanKartu href="/peta/konflik" warna="#c2410c">Buka peta konflik</TautanKartu>} />
+        <JudulSeksi id="konflik" ikon={AlertTriangle} warna="#c2410c" judul="Konflik" sub={`${konflik.length} kasus dari data sekunder dan berita online`} aksi={<TautanKartu href="/peta/konflik" warna="#c2410c">Buka peta konflik</TautanKartu>} />
         <div className="mt-4 grid gap-4 lg:grid-cols-2 3xl:grid-cols-4">
           <Kartu judul="Status penanganan" sub="Sudah sejauh mana kasusnya ditangani" className="muncul-gulir"
             info="Status kasus dari berita dibaca otomatis dari isi artikel. Tetap perlu dicek ke lapangan.">
@@ -435,7 +435,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         <p className="mt-8 text-center text-[12.5px] text-muted">
-          Sumber: TanahKita.id, OpenStreetMap, Google News, dan kamus sentimen InSet. Data aktor dan media sosial masih contoh{fokus ? ` · Fokus: ${namaWilayah(fokus.id)}` : ""}.
+          Sumber: data sekunder, OpenStreetMap, Google News, dan kamus sentimen InSet. Data aktor dan media sosial masih contoh{fokus ? ` · Fokus: ${namaWilayah(fokus.id)}` : ""}.
         </p>
       </div>
     </>

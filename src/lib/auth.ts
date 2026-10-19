@@ -4,18 +4,25 @@ import type { Peran, Sesi } from "./types";
 export const COOKIE = "sesi";
 const MASA_BERLAKU = 8 * 60 * 60; // 8 jam
 
-const rahasia = () =>
-  new TextEncoder().encode(process.env.AUTH_SECRET ?? "prototipe-ganti-rahasia-ini-sebelum-dipakai-sungguhan");
+const DEV = process.env.NODE_ENV !== "production";
 
-/**
- * Akun demo khusus prototipe. Versi sungguhan memakai tabel pengguna di database
- * dengan password ter-hash, dibuat oleh admin.
- */
-export const AKUN_DEMO: { username: string; password: string; nama: string; peran: Peran }[] = [
-  { username: "admin", password: "admin123", nama: "Admin Tim Studi", peran: "admin" },
-  { username: "editor", password: "editor123", nama: "Analis Lapangan", peran: "editor" },
-  { username: "viewer", password: "viewer123", nama: "Manajemen PHR", peran: "viewer" },
+// Di produksi rahasia dan password wajib dari env; nilai cadangan hanya untuk dev lokal.
+const rahasia = () => {
+  const r = process.env.AUTH_SECRET ?? (DEV ? "rahasia-dev-lokal" : undefined);
+  if (!r) throw new Error("AUTH_SECRET belum diisi");
+  return new TextEncoder().encode(r);
+};
+
+const pw = (env: string | undefined, dev: string) => env || (DEV ? dev : undefined);
+
+const AKUN: { username: string; password: string | undefined; nama: string; peran: Peran }[] = [
+  { username: "admin", password: pw(process.env.PASSWORD_ADMIN, "admin123"), nama: "Admin Tim Studi", peran: "admin" },
+  { username: "editor", password: pw(process.env.PASSWORD_EDITOR, "editor123"), nama: "Analis Lapangan", peran: "editor" },
+  { username: "viewer", password: pw(process.env.PASSWORD_VIEWER, "viewer123"), nama: "Manajemen PHR", peran: "viewer" },
 ];
+
+export const cariAkun = (username: string | undefined, password: string | undefined) =>
+  AKUN.find((a) => a.password && a.username === username?.trim().toLowerCase() && a.password === password);
 
 export async function buatToken(s: Sesi) {
   return new SignJWT({ ...s })

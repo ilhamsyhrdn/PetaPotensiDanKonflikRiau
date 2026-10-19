@@ -352,7 +352,7 @@ export default function PetaTematik({ tema, titik, ringkasan, opsi, fokus, ringk
                 </section>
               </div>
               <div className="flex items-center gap-3 border-t border-line bg-bg px-3 py-2">
-                <p className="flex-1 text-[11px] leading-snug text-muted">Batas wilayah: OpenStreetMap. {tema === "konflik" ? "Konflik: TanahKita.id & berita online." : "Potensi: OpenStreetMap, kategori lapangan usaha BPS."}</p>
+                <p className="flex-1 text-[11px] leading-snug text-muted">Batas wilayah: OpenStreetMap. {tema === "konflik" ? "Konflik: data sekunder & berita online." : "Potensi: OpenStreetMap, kategori lapangan usaha BPS."}</p>
                 {hp && <button onClick={() => setPanel(false)} className="shrink-0 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">Lihat {tersaring.length.toLocaleString("id-ID")} titik</button>}
               </div>
             </aside>

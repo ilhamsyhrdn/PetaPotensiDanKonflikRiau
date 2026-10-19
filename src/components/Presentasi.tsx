@@ -249,7 +249,7 @@ function PanelKonflik({ x }: { x: Ikhtisar }) {
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-[11px] text-white/45">Sumber: TanahKita.id dan berita online. Konflik dari berita perlu diverifikasi tim lapangan.</p>
+      <p className="mt-4 text-[11px] text-white/45">Sumber: data sekunder dan berita online. Konflik dari berita perlu diverifikasi tim lapangan.</p>
     </>
   );
 }

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { AKUN_DEMO, COOKIE, buatToken, opsiCookie } from "@/lib/auth";
+import { COOKIE, cariAkun, buatToken, opsiCookie } from "@/lib/auth";
 
 export async function POST(req: Request) {
   const { username, password } = (await req.json().catch(() => ({}))) as { username?: string; password?: string };
-  const akun = AKUN_DEMO.find((a) => a.username === username?.trim().toLowerCase() && a.password === password);
+  const akun = cariAkun(username, password);
   if (!akun) {
     return NextResponse.json({ pesan: "Username atau password salah. Periksa lagi lalu coba masuk." }, { status: 401 });
   }

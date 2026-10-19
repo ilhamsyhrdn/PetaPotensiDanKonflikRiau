@@ -6,7 +6,7 @@ import { ImagePlus, Loader2, Pencil, Plus, RotateCcw, Search, Trash2, X } from "
 import type { Database, Koleksi, Peran } from "@/lib/types";
 import { SKEMA, TAB_KELOLA, ratakan, type Field } from "@/lib/skema";
 import { WILAYAH, getWilayah, labelWilayah } from "@/lib/wilayah";
-import { tanggal } from "@/lib/format";
+import { labelAsal, tanggal } from "@/lib/format";
 import { kategoriPotensi } from "@/lib/kategori";
 
 type Baris = Record<string, unknown> & { id: string };
@@ -78,7 +78,7 @@ export default function KelolaData({ koleksi, baris, total, hal, perHal, q, juml
     if (kunci === "kategori" && koleksi === "potensi") return kategoriPotensi(String(v)).nama;
     return String(v ?? "");
   };
-  const lencanaAsal = (b: Baris) => <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${b.asal === "Input" ? "bg-accent-soft text-accent" : b.asal === "Contoh" ? "bg-amber-100 text-amber-800" : "bg-bg text-muted"}`}>{String(b.asal ?? "")}</span>;
+  const lencanaAsal = (b: Baris) => <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${b.asal === "Input" ? "bg-accent-soft text-accent" : b.asal === "Contoh" ? "bg-amber-100 text-amber-800" : "bg-bg text-muted"}`}>{labelAsal(String(b.asal ?? ""))}</span>;
   const aksi = (b: Baris) => hapus === b.id ? (
     <span className="inline-flex items-center gap-2 text-xs">Hapus data ini?
       <button onClick={() => hapusItem(b.id)} className="rounded bg-neg px-2 py-1 font-semibold text-white">Hapus</button>

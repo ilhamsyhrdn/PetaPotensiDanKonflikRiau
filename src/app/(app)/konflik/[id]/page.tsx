@@ -41,7 +41,7 @@ export default async function DetailKonflik({ params }: { params: Promise<{ id: 
       <div className="progres-gulir" aria-hidden />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm">
         <Link href={`/peta/konflik?w=${kab?.id ?? ""}`} className="flex items-center gap-1.5 text-muted hover:text-accent"><ArrowLeft size={15} /> Peta konflik</Link>
-        <p className="eyebrow">Data detil konflik · {k.asal === "TanahKita" ? "sumber TanahKita.id" : k.asal === "Berita" ? "dihimpun dari berita online" : k.asal}</p>
+        <p className="eyebrow">Data detil konflik · {k.asal === "TanahKita" ? "data sekunder" : k.asal === "Berita" ? "dihimpun dari berita online" : k.asal}</p>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] 3xl:grid-cols-[minmax(0,1fr)_440px]">

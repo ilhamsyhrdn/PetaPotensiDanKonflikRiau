@@ -22,8 +22,11 @@ export async function bacaDb(): Promise<Database> {
     if (!cache || cache.mtime !== mtime) cache = { mtime, db: JSON.parse(fs.readFileSync(FILE, "utf8")) as Database };
     return cache.db;
   } catch {
+    if (cache) return cache.db;
     const seed = buatSeed();
-    tulisDb(seed);
+    cache = { mtime: 0, db: seed };
+    // hosting dengan disk read-only: halaman tetap tampil, hanya penyimpanan yang gagal
+    try { tulisDb(seed); } catch {}
     return seed;
   }
 }

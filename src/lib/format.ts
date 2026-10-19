@@ -39,4 +39,9 @@ export const domain = (url?: string) => {
   try { return url ? new URL(url).hostname.replace(/^www\./, "") : ""; } catch { return ""; }
 };
 
+// Nama TanahKita tidak ditampilkan di web; data mentahnya tetap menyimpan asal aslinya.
+export const labelAsal = (asal: string) => (asal === "TanahKita" ? "Data sekunder" : asal);
+export const dariTanahKita = (r: { nama?: string; url?: string }) => /tanah\s*kita/i.test(`${r.nama ?? ""} ${r.url ?? ""}`);
+export const tanpaTanahKita = <T extends { nama?: string; url?: string }>(list: T[]) => list.filter((r) => !dariTanahKita(r));
+
 export const potong = (s: string, n: number) => (s.length > n ? s.slice(0, n).replace(/\s+\S*$/, "") + "…" : s);
