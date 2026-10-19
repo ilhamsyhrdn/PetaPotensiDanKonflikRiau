@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# data prototipe (dibuat ulang otomatis dari seed)
+/data/db.json
+/data/uploads/
+
+# cache unduhan skrip data
+/scripts/data/.cache/

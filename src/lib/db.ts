@@ -1,0 +1,55 @@
+import "server-only";
+import fs from "node:fs";
+import path from "node:path";
+import type { Database, Koleksi } from "./types";
+import { buatSeed } from "./seed";
+
+/**
+ * Penyimpanan sementara berbasis file JSON (data/db.json).
+ * Nanti diganti PostgreSQL + PostGIS; fungsi di sini jadi satu-satunya titik yang perlu diubah.
+ *
+ * Isi berkas disimpan di memori dan hanya dibaca ulang bila berkas berubah (mtime), karena berkasnya
+ * beberapa MB. Pembacaan sinkron juga mencegah React (mode dev) menyalin isi berkas ke halaman sebagai info debug.
+ */
+const FILE = path.join(process.cwd(), "data", "db.json");
+
+let cache: { mtime: number; db: Database } | null = null;
+let antrean: Promise<unknown> = Promise.resolve();
+
+export async function bacaDb(): Promise<Database> {
+  try {
+    const mtime = fs.statSync(FILE).mtimeMs;
+    if (!cache || cache.mtime !== mtime) cache = { mtime, db: JSON.parse(fs.readFileSync(FILE, "utf8")) as Database };
+    return cache.db;
+  } catch {
+    const seed = buatSeed();
+    tulisDb(seed);
+    return seed;
+  }
+}
+
+function tulisDb(db: Database) {
+  fs.mkdirSync(path.dirname(FILE), { recursive: true });
+  const tmp = FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(db), "utf8");
+  fs.renameSync(tmp, FILE);
+  cache = { mtime: fs.statSync(FILE).mtimeMs, db };
+}
+
+/** Ubah data secara berurutan supaya dua simpanan bersamaan tidak saling menimpa. */
+export function ubahDb<T>(fn: (db: Database) => T): Promise<T> {
+  const job = antrean.then(async () => {
+    const db = structuredClone(await bacaDb());
+    const hasil = fn(db);
+    tulisDb(db);
+    return hasil;
+  });
+  antrean = job.catch(() => undefined);
+  return job;
+}
+
+export async function resetDb() {
+  await ubahDb((db) => Object.assign(db, buatSeed()));
+}
+
+export const KOLEKSI: Koleksi[] = ["konflik", "potensi", "aktor", "media"];

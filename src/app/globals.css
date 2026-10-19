@@ -1,26 +1,115 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Palet mengikuti dokumen project: biru tua (ink), biru baja (accent), ungu (extended), karat (konflik).
+   Warna semantik terpisah: konflik, potensi, aktor, sentimen. */
+@theme {
+  --color-bg: #f3f5f9;
+  --color-surface: #ffffff;
+  --color-ink: #122030;
+  --color-muted: #5b6b7c;
+  --color-line: #e5eaf0;
+  --color-accent: #2f6690;
+  --color-accent-soft: #e6f0f8;
+  --color-navy: #0f1b27;
+  --color-navy-2: #1a2c3d;
+  --color-karat: #a23a1c;
+
+  --color-konflik: #d9480f;
+  --color-potensi: #2b8a3e;
+  --color-aktor: #7a58a3;
+  --color-pos: #2f9e44;
+  --color-neu: #868e96;
+  --color-neg: #e03131;
+
+  --breakpoint-3xl: 112rem;
+
+  --font-sans: var(--font-jakarta), "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-plex), ui-monospace, Consolas, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root { --tinggi-nav: 60px; }
+html { scroll-padding-top: calc(var(--tinggi-nav) + 12px); }
+html, body { min-height: 100%; }
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.num { font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); }
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 20px -12px rgb(16 24 40 / 0.12);
+}
+/* Kartu yang bisa diklik: sedikit terangkat saat disorot */
+.card-angkat { transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease; }
+.card-angkat:hover { transform: translateY(-2px); border-color: #d3dce6; box-shadow: 0 2px 4px rgb(16 24 40 / 0.05), 0 16px 32px -16px rgb(16 24 40 / 0.22); }
+
+/* Tabel data bergaya modern */
+.tabel { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
+.tabel thead th { position: sticky; top: 0; z-index: 1; background: #f7f9fc; color: var(--color-muted); font-size: 11.5px; font-weight: 600; text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--color-line); white-space: nowrap; }
+.tabel tbody td { padding: 10px 14px; border-bottom: 1px solid #eef2f6; vertical-align: middle; }
+.tabel tbody tr:last-child td { border-bottom: 0; }
+.tabel tbody tr { transition: background-color 120ms; }
+.tabel tbody tr:hover { background: #f7fafd; }
+
+/* Grid tipis untuk latar hero */
+.pola-grid {
+  background-image: linear-gradient(rgb(143 184 216 / 0.07) 1px, transparent 1px), linear-gradient(90deg, rgb(143 184 216 / 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 70% at 70% 30%, #000 30%, transparent 75%);
+}
+
+/* Pola garis kontur (dipakai di header halaman & hero) */
+.pola-kontur {
+  background-image:
+    radial-gradient(circle at 20% 30%, transparent 0 38px, rgb(143 184 216 / 0.13) 39px 40px, transparent 41px 78px, rgb(143 184 216 / 0.1) 79px 80px, transparent 81px),
+    radial-gradient(circle at 80% 70%, transparent 0 58px, rgb(143 184 216 / 0.1) 59px 60px, transparent 61px 118px, rgb(143 184 216 / 0.08) 119px 120px, transparent 121px);
+  background-size: 320px 320px, 420px 420px;
+}
+
+/* Popup peta */
+.maplibregl-popup-content { border-radius: 14px !important; padding: 12px 14px !important; box-shadow: 0 8px 28px rgb(20 34 48 / 0.22) !important; font-family: var(--font-sans); color: var(--color-ink); max-width: min(320px, calc(100vw - 32px)); }
+.maplibregl-popup-close-button { font-size: 18px; padding: 2px 8px; color: var(--color-muted); }
+.maplibregl-ctrl-attrib { font-size: 10px; }
+
+@keyframes muncul { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+.anim-muncul { animation: muncul 420ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes progres { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes geser-masuk { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.anim-turun { animation: geser-masuk 180ms ease-out both; }
+
+/* Efek gulir berbasis CSS (scroll-driven). Browser yang belum mendukung tetap menampilkan konten apa adanya. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .muncul-gulir {
+      animation: naik-gulir linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 32%;
+    }
+    @keyframes naik-gulir { from { opacity: 0.25; transform: translateY(28px) scale(0.985); } to { opacity: 1; transform: none; } }
+
+    .progres-gulir {
+      position: fixed; inset: var(--tinggi-nav) 0 auto 0; height: 3px; z-index: 40; transform-origin: 0 50%;
+      background: linear-gradient(90deg, #4dabf7, #ffd43b);
+      animation: progres linear both; animation-timeline: scroll(root);
+    }
   }
 }
+.progres-gulir { display: none; }
+@supports (animation-timeline: scroll()) { @media (prefers-reduced-motion: no-preference) { .progres-gulir { display: block; } } }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  .anim-muncul, .anim-turun { animation: none; }
+  html { scroll-behavior: auto; }
 }
+
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* Bilah gulir tipis untuk panel samping */
+.gulir-tipis { scrollbar-width: thin; scrollbar-color: #c5d0db transparent; }
