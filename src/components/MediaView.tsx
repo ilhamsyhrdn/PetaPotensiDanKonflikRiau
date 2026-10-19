@@ -140,7 +140,7 @@ export default function MediaView({ media, letupan, hari }: { media: Media[]; le
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Kartu judul="Nada berita per daerah" sub="30 hari terakhir. Klik nama daerah untuk melihat datanya saja." rapat>
-          <table className="tabel">
+          <div className="overflow-x-auto"><table className="tabel">
             <thead><tr><th>Daerah</th><th>Komposisi nada</th><th className="!text-right">Jumlah</th><th className="!text-right">Indeks</th></tr></thead>
             <tbody>
               {perKab.map(({ k, r }) => (
@@ -156,11 +156,11 @@ export default function MediaView({ media, letupan, hari }: { media: Media[]; le
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
           {tanpaLokasi > 0 && <p className="border-t border-line px-5 py-2.5 text-[12px] text-muted">{tanpaLokasi} {satuan} lainnya membahas Riau secara umum, tanpa menyebut kabupaten tertentu.</p>}
         </Kartu>
         <Kartu judul="Media yang paling sering memberitakan" sub="30 hari terakhir" rapat>
-          <table className="tabel">
+          <div className="overflow-x-auto"><table className="tabel">
             <thead><tr><th>Media</th><th>Komposisi nada</th><th className="!text-right">Jumlah</th></tr></thead>
             <tbody>
               {perSumber.map(({ s, r }) => (
@@ -175,12 +175,12 @@ export default function MediaView({ media, letupan, hari }: { media: Media[]; le
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </Kartu>
       </div>
 
       <Kartu judul="Berita terbaru" rapat aksi={<TautanKartu href={`/berita${tab === "sosmed" ? "?tipe=sosmed" : ""}`}>Buka halaman Berita</TautanKartu>}>
-        <ul className="grid gap-px bg-[#eef2f6] lg:grid-cols-2 3xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-px bg-[#eef2f6] lg:grid-cols-2 3xl:grid-cols-3">
           {data.slice(0, 12).map((m) => (
             <li key={m.id} className="bg-surface">
               <Link href={`/berita/${encodeURIComponent(m.id)}`} className="flex items-center gap-3.5 px-5 py-2.5 transition hover:bg-[#f7fafd]">

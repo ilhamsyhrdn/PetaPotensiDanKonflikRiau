@@ -41,6 +41,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
     const i = list.findIndex((x) => x.id === id);
     if (i < 0) return false;
     const [hapus] = list.splice(i, 1);
+    if ("asal" in hapus && hapus.asal !== "Input") db.dihapus = [...(db.dihapus ?? []), id];
     if (k === "aktor") db.relasi = db.relasi.filter((r) => r.dari !== id && r.ke !== id);
     db.log.unshift({ waktu: new Date().toISOString(), oleh: cek.sesi.username, aksi: `Menghapus ${SKEMA[k].tunggal}: ${hapus.judul ?? hapus.nama ?? id}` });
     return true;

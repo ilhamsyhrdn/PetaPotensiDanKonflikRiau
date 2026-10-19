@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import type { Sesi } from "@/lib/types";
 import LogoRiau from "./Logo";
+import TombolPerbarui from "./TombolPerbarui";
 
 type Item = { href: string; label: string; ket?: string; ikon: typeof LayoutDashboard; cocok?: string[] };
 type Grup = { label: string; ikon: typeof LayoutDashboard; anak: Item[] } | Item;
@@ -69,12 +70,12 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
         </Link>
 
         {/* Navigasi desktop */}
-        <nav aria-label="Menu utama" className="ml-6 hidden flex-1 items-center gap-0.5 lg:flex">
+        <nav aria-label="Menu utama" className="ml-3 hidden flex-1 items-center gap-0.5 lg:flex xl:ml-6">
           {MENU.map((g) => "anak" in g ? (
             <div key={g.label} className="relative" onMouseEnter={() => setBuka(g.label)} onMouseLeave={() => setBuka(null)}>
               <button aria-expanded={buka === g.label} aria-haspopup="true" onClick={() => setBuka(buka === g.label ? null : g.label)}
-                className={`my-2.5 flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[14px] transition-colors ${grupAktif(g) ? "bg-white/12 font-semibold text-white" : "text-white/70 hover:bg-white/[0.06] hover:text-white"}`}>
-                <g.ikon size={16} /> {g.label} <ChevronDown size={14} className={`transition-transform ${buka === g.label ? "rotate-180" : ""}`} />
+                className={`my-2.5 flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-[14px] xl:px-3.5 transition-colors ${grupAktif(g) ? "bg-white/12 font-semibold text-white" : "text-white/70 hover:bg-white/[0.06] hover:text-white"}`}>
+                <g.ikon size={16} className="hidden xl:block" /> {g.label} <ChevronDown size={14} className={`transition-transform ${buka === g.label ? "rotate-180" : ""}`} />
               </button>
               {buka === g.label && (
                 <div className="anim-turun absolute left-0 top-full w-72 rounded-2xl border border-line bg-surface p-1.5 text-ink shadow-2xl">
@@ -89,17 +90,18 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
             </div>
           ) : (
             <Link key={g.href} href={g.href} aria-current={aktif(g) ? "page" : undefined}
-              className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[14px] transition-colors ${aktif(g) ? "bg-white/12 font-semibold text-white" : "text-white/70 hover:bg-white/[0.06] hover:text-white"}`}>
-              <g.ikon size={16} /> {g.label}
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-[14px] xl:px-3.5 transition-colors ${aktif(g) ? "bg-white/12 font-semibold text-white" : "text-white/70 hover:bg-white/[0.06] hover:text-white"}`}>
+              <g.ikon size={16} className="hidden xl:block" /> {g.label}
             </Link>
           ))}
+          <TombolPerbarui />
         </nav>
 
         {/* Pengguna (desktop) */}
         <div className="relative ml-auto hidden lg:block" onMouseLeave={() => buka === "pengguna" && setBuka(null)}>
           <button onClick={() => setBuka(buka === "pengguna" ? null : "pengguna")} aria-expanded={buka === "pengguna"} className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 hover:bg-white/10">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-[#4dabf7] text-xs font-bold text-navy">{inisial}</span>
-            <span className="text-left leading-tight"><span className="block text-[13px] font-semibold">{sesi.nama}</span><span className="block text-[10.5px] text-white/55">{LABEL_PERAN[sesi.peran]}</span></span>
+            <span className="hidden text-left leading-tight xl:block"><span className="block text-[13px] font-semibold">{sesi.nama}</span><span className="block text-[10.5px] text-white/55">{LABEL_PERAN[sesi.peran]}</span></span>
             <ChevronDown size={14} className="text-white/60" />
           </button>
           {buka === "pengguna" && (
@@ -126,6 +128,7 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
                 {g.anak.map((i) => <LinkHp key={i.href} i={i} on={aktif(i)} />)}
               </div>
             ) : <LinkHp key={g.href} i={g} on={aktif(g)} />)}
+            <TombolPerbarui hp />
           </nav>
           <div className="mt-6 flex items-center justify-between rounded-xl bg-white/5 px-3 py-3">
             <span className="flex items-center gap-2.5">

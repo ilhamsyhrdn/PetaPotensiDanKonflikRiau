@@ -21,7 +21,8 @@ export function InfoTip({ teks }: { teks: string }) {
       <button type="button" aria-label={teks} className="grid h-5 w-5 place-items-center rounded-full text-muted/70 transition hover:text-accent focus:text-accent focus:outline-none">
         <Info size={14} />
       </button>
-      <span role="tooltip" className="pointer-events-none absolute left-1/2 top-full z-30 mt-1.5 w-60 -translate-x-1/2 rounded-lg bg-navy px-3 py-2 text-[12px] font-normal normal-case leading-relaxed tracking-normal text-white opacity-0 shadow-xl transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
+      {/* hidden, bukan opacity-0: kotak tak terlihat tetap memperlebar halaman di HP */}
+      <span role="tooltip" className="pointer-events-none absolute left-1/2 top-full z-30 mt-1.5 hidden w-60 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-lg bg-navy px-3 py-2 text-[12px] font-normal normal-case leading-relaxed tracking-normal text-white shadow-xl group-focus-within:block group-hover:block">
         {teks}
       </span>
     </span>

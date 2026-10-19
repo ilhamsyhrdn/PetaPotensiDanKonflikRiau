@@ -57,6 +57,12 @@ Hasil skrip ditulis ke `data/sumber/*.json` dan `public/geo/*.geojson`. Setelah 
 **Muat ulang data** di Kelola Data (atau hapus `data/db.json`). Unduhan mentah di-cache di
 `scripts/data/.cache`; tambahkan `--segar` pada skrip untuk mengunduh ulang.
 
+**Tombol Perbarui** (navigasi, semua peran) menjalankan skrip berita dan konflik di server
+(`--segar`, konflik dengan `--tanpa-tanahkita`), potensi bila sudah ≥ 7 hari, lalu **menggabungkan** hasilnya:
+data baru ditambahkan, data lama dan hasil edit tidak ditimpa, data yang pernah dihapus tidak muncul lagi.
+Di produksi pembaruan juga berjalan otomatis tiap hari ± 06.00 WIB (`src/instrumentation.ts`); matikan dengan
+env `PEMBARUAN_OTOMATIS=0`. Status terakhir disimpan di `data/pembaruan.json`.
+
 | Data | Sumber | Catatan lisensi |
 |---|---|---|
 | Batas kab/kec & titik desa | OpenStreetMap (Nominatim, Overpass) | ODbL, wajib atribusi "© OpenStreetMap contributors". Batas desa belum ada di OSM untuk sebagian besar Riau |

@@ -203,7 +203,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <HeroRiau
-        label={fokus ? `Sedang melihat ${labelWilayah(fokus.id)}` : `Data terakhir dimuat ${tanggal(db.meta?.dimuat ?? hari)}`}
+        label={fokus ? `Sedang melihat ${labelWilayah(fokus.id)}` : `Data terakhir diperbarui ${tanggal(new Date(Date.parse(db.meta?.dimuat ?? hari) + 7 * 36e5).toISOString())}`}
         judul={fokus ? `Konflik & potensi ekonomi di ${namaLengkap(fokus)}` : "Konflik & potensi ekonomi di Riau"}
         keterangan={fokus ? "Semua angka dan peta di halaman ini sudah difilter ke daerah ini saja." : "Pantau titik konflik, sebaran usaha, dan nada pemberitaan tentang perusahaan di 12 kabupaten/kota. Pilih daerah untuk melihat lebih dekat."}
         konflik={unik(konflik.map((k) => bulat(k.koordinat)))}

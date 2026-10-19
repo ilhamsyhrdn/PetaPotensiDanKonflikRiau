@@ -145,9 +145,13 @@ export default function PetaTematik({ tema, titik, ringkasan, opsi, fokus, ringk
     const map = petaRef.current;
     if (!map || !siap) return;
     const tooltip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 10 });
+    // di layar sentuh, ketukan juga memicu mousemove; label hover akan bertumpuk dengan popup
+    const bisaHover = window.matchMedia("(hover: hover)").matches;
     let hoverId: string | null = null;
+    let popupId: string | null = null;
 
     const klik = async (e: maplibregl.MapMouseEvent) => {
+      tooltip.remove();
       const f = map.queryRenderedFeatures(e.point, { layers: ["klaster", "titik", "studi", "kec-fill", "kab-fill"].filter((l) => map.getLayoutProperty(l, "visibility") !== "none") })[0];
       if (!f) return;
       const id = String(f.properties?.id);
@@ -165,6 +169,7 @@ export default function PetaTematik({ tema, titik, ringkasan, opsi, fokus, ringk
           .filter((i) => i !== id).map((i) => byId.get(i)).filter((v): v is TitikPeta => !!v);
         popupRef.current?.remove();
         sorot("titik", id);
+        popupId = id;
         popupRef.current = new maplibregl.Popup({ offset: 12, maxWidth: "320px" }).setLngLat(t.koordinat)
           .setHTML(tumpuk.length ? htmlDaftarTitik([t, ...tumpuk], tema) : htmlTitik(t, tema)).addTo(map);
         return;
@@ -185,6 +190,7 @@ export default function PetaTematik({ tema, titik, ringkasan, opsi, fokus, ringk
         hoverId = baru;
       }
       const f = titikDi[0];
+      if (!bisaHover || (f && String(f.properties?.id) === popupId && popupRef.current?.isOpen())) { tooltip.remove(); return; }
       const label = f ? (f.layer.id === "klaster" ? `${f.properties?.point_count} ${JUDUL[tema].titik} · klik untuk perbesar` : f.layer.id === "titik" ? String(f.properties?.nama) : `Desa studi ${f.properties?.nama}`)
         : kec ? `Kec. ${kec.properties?.nama} · ${perWilayah[String(kec.properties?.id)] ?? 0} ${JUDUL[tema].titik}`
         : poli[0] ? `${poli[0].properties?.jenis === "Kota" ? "Kota" : "Kab."} ${poli[0].properties?.nama} · ${perWilayah[String(poli[0].properties?.id)] ?? 0} ${JUDUL[tema].titik}` : null;

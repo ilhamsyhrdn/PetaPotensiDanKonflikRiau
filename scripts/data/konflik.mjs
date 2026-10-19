@@ -3,6 +3,7 @@
 //   2) Google News RSS — judul berita konflik/sengketa/protes, dilokasikan dengan gazetir dan dideduplikasi per kejadian
 // Hasil: data/sumber/konflik.json
 // Jalankan: node scripts/data/konflik.mjs   (tambah --segar untuk mengabaikan cache unduhan)
+//   --tanpa-tanahkita  pakai ulang entri TanahKita dari hasil sebelumnya tanpa mengakses situsnya
 import fs from "node:fs";
 import path from "node:path";
 import { CACHE, SUMBER, ambil, slug, hash, simpan, tidur, bersihJudul, rapikanTeks } from "./_lib.mjs";
@@ -254,9 +255,13 @@ function konteks(wilayahId) {
 
 // ---------- 1. TanahKita ----------
 console.log("1/3 TanahKita.id");
-const geo = JSON.parse(await unduh("https://tanahkita.id/data_service/map/jkpp.geojson?limit=5000&x_gte=95&y_gte=-11&y_lte=11", "tanahkita-jkpp.geojson", 2500));
-const fiturRiau = geo.features.filter((f) => /^riau$/i.test(String(f.properties.nm_propinsi).trim()));
-console.log(`  ${geo.features.length} fitur nasional, ${fiturRiau.length} di Riau`);
+const TANPA_TK = process.argv.includes("--tanpa-tanahkita");
+let fiturRiau = [];
+if (!TANPA_TK) {
+  const geo = JSON.parse(await unduh("https://tanahkita.id/data_service/map/jkpp.geojson?limit=5000&x_gte=95&y_gte=-11&y_lte=11", "tanahkita-jkpp.geojson", 2500));
+  fiturRiau = geo.features.filter((f) => /^riau$/i.test(String(f.properties.nm_propinsi).trim()));
+  console.log(`  ${geo.features.length} fitur nasional, ${fiturRiau.length} di Riau`);
+}
 
 // perbaikan kecil isian keterlibatan TanahKita yang terpotong/salah ketik
 const KOREKSI = { "PT R": "PT RAPP", "erkumpulan Elang": "Perkumpulan Elang", "KPH-SIAK": "KPH Siak" };
@@ -337,6 +342,11 @@ for (const f of fiturRiau) {
     keterlibatan, ringkasan, narasi, sumber, lampiran: det?.lampiran ?? [],
     wilayahId: lok.wilayahId, presisi: lok.presisi, koordinat, asal: "TanahKita",
   });
+}
+if (TANPA_TK) {
+  const lama = JSON.parse(fs.readFileSync(path.join(SUMBER, "konflik.json"), "utf8"));
+  dataTK.push(...lama.data.filter((d) => d.asal === "TanahKita"));
+  console.log("  dilewati (--tanpa-tanahkita), entri lama dipakai ulang");
 }
 console.log(`  ${dataTK.length} entri TanahKita`);
 

@@ -84,6 +84,10 @@ async function unduh(kunci, query) {
 }
 
 console.log("1/4 Unduh Overpass per kategori");
+// --segar: ambil ulang kategori yang cache-nya > 6 hari; yang baru saja berhasil diunduh dipakai lagi,
+// jadi bila Overpass gagal di tengah jalan, percobaan berikutnya melanjutkan dari kategori yang gagal
+if (process.argv.includes("--segar")) for (const f of fs.readdirSync(CACHE))
+  if (f.startsWith("overpass-potensi-") && Date.now() - fs.statSync(path.join(CACHE, f)).mtimeMs > 6 * 864e5) fs.rmSync(path.join(CACHE, f));
 const semua = new Map(); // "n123" → elemen (satu objek bisa muncul di beberapa query)
 let jeda = false;
 for (const [kat, isi] of Object.entries(Q)) {

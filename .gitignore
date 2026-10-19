@@ -43,6 +43,7 @@ next-env.d.ts
 # data prototipe (dibuat ulang otomatis dari seed)
 /data/db.json
 /data/uploads/
+/data/pembaruan.json
 
 # cache unduhan skrip data
 /scripts/data/.cache/

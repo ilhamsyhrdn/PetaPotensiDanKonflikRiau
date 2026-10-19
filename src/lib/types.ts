@@ -128,6 +128,8 @@ export type Database = {
   log: { waktu: string; oleh: string; aksi: string }[];
   /** Kapan tiap sumber data terbuka terakhir dimuat. */
   meta?: { sumber: { nama: string; url?: string; lisensi?: string; catatan?: string }[]; dimuat: string };
+  /** id data sumber terbuka yang dihapus pengguna, supaya tidak muncul lagi saat data diperbarui. */
+  dihapus?: string[];
 };
 
 export type Koleksi = "konflik" | "potensi" | "aktor" | "media" | "dokumen";

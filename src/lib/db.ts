@@ -58,7 +58,33 @@ export function ubahDb<T>(fn: (db: Database) => T): Promise<T> {
 
 export async function resetDb() {
   // dokumen baseline diisi manual, bukan dari sumber terbuka, jadi tidak ikut dikembalikan
-  await ubahDb((db) => Object.assign(db, buatSeed(), { dokumen: db.dokumen }));
+  await ubahDb((db) => Object.assign(db, buatSeed(), { dokumen: db.dokumen, dihapus: [] }));
+}
+
+/**
+ * Gabungkan hasil skrip data terbaru (data/sumber) ke database tanpa menimpa yang sudah ada:
+ * data baru ditambahkan, data lama (termasuk yang sudah diedit) dibiarkan, data yang pernah dihapus tidak dimunculkan lagi.
+ */
+export async function gabungDariSumber(oleh: string) {
+  const seed = buatSeed();
+  return ubahDb((db) => {
+    const dihapus = new Set(db.dihapus ?? []);
+    const tambah = <T extends { id: string; tanggal?: string }>(lama: T[], baru: T[]) => {
+      const ada = new Set(lama.map((x) => x.id));
+      const masuk = baru.filter((x) => !ada.has(x.id) && !dihapus.has(x.id));
+      lama.push(...masuk);
+      lama.sort((a, b) => (b.tanggal ?? "").localeCompare(a.tanggal ?? ""));
+      return masuk.length;
+    };
+    const n = {
+      media: tambah(db.media, seed.media.filter((m) => m.asal !== "Contoh")),
+      konflik: tambah(db.konflik, seed.konflik),
+      potensi: tambah(db.potensi, seed.potensi),
+    };
+    db.meta = { sumber: seed.meta?.sumber ?? db.meta?.sumber ?? [], dimuat: new Date().toISOString() };
+    db.log.unshift({ waktu: new Date().toISOString(), oleh, aksi: `Memperbarui data: +${n.media} berita, +${n.konflik} konflik, +${n.potensi} potensi` });
+    return n;
+  });
 }
 
 export const KOLEKSI: Koleksi[] = ["konflik", "potensi", "aktor", "media", "dokumen"];

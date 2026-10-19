@@ -28,7 +28,8 @@
 }
 
 :root { --tinggi-nav: 60px; }
-html { scroll-padding-top: calc(var(--tinggi-nav) + 12px); }
+/* pengaman: elemen yang meluber tidak boleh membuat halaman bisa digeser ke samping di HP */
+html { scroll-padding-top: calc(var(--tinggi-nav) + 12px); overflow-x: clip; }
 html, body { min-height: 100%; }
 body {
   background: var(--color-bg);
