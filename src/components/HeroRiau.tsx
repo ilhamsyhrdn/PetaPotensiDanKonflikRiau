@@ -7,8 +7,10 @@ import { Parallax } from "./Efek";
  * Hero dashboard: judul, tombol utama, dan siluet Riau berisi titik konflik & potensi (lapisan parallax).
  * Kartu angka ditaruh di luar hero dan menumpang ke bawahnya, jadi hero diberi ruang bawah ekstra.
  */
-export default function HeroRiau({ judul, label, keterangan, konflik, potensi, aksi, samping }: {
+export default function HeroRiau({ judul, label, keterangan, konflik, potensi, aksi, samping, wilayah }: {
   judul: string; label: string; keterangan: string; konflik: [number, number][]; potensi: [number, number][]; aksi?: React.ReactNode;
+  /** Wilayah fokus yang dibawa tombol peta. */
+  wilayah?: string;
   /** Panel tambahan yang hanya muncul di layar sangat lebar, di antara teks dan siluet. */
   samping?: React.ReactNode;
 }) {
@@ -32,8 +34,8 @@ export default function HeroRiau({ judul, label, keterangan, konflik, potensi, a
           <h1 className="mt-4 max-w-2xl text-[30px] font-extrabold leading-[1.1] tracking-tight text-balance sm:text-[44px]">{judul}</h1>
           <p className="mt-3 max-w-xl text-[15.5px] leading-relaxed text-white/70">{keterangan}</p>
           <div className="mt-6 flex flex-wrap gap-2.5">
-            <Link href="/peta/konflik" className="flex items-center gap-2 rounded-xl bg-[#c2410c] px-4 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition hover:-translate-y-0.5 hover:bg-[#d4521b]"><AlertTriangle size={16} /> Peta konflik</Link>
-            <Link href="/peta/potensi" className="flex items-center gap-2 rounded-xl bg-[#2f6690] px-4 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition hover:-translate-y-0.5 hover:bg-[#3873a0]"><Gem size={16} /> Peta potensi ekonomi</Link>
+            <Link href={`/peta/konflik${wilayah ? `?w=${wilayah}` : ""}`} className="flex items-center gap-2 rounded-xl bg-[#c2410c] px-4 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition hover:-translate-y-0.5 hover:bg-[#d4521b]"><AlertTriangle size={16} /> Peta konflik</Link>
+            <Link href={`/peta/potensi${wilayah ? `?w=${wilayah}` : ""}`} className="flex items-center gap-2 rounded-xl bg-[#2f6690] px-4 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition hover:-translate-y-0.5 hover:bg-[#3873a0]"><Gem size={16} /> Peta potensi ekonomi</Link>
             <Link href="/presentasi" className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold ring-1 ring-white/15 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/15"><MonitorPlay size={16} /> Mode presentasi</Link>
           </div>
           {aksi && <div className="mt-5 w-full max-w-md">{aksi}</div>}

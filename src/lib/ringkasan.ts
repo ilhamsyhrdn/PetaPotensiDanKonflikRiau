@@ -24,7 +24,7 @@ export function hitungRingkasan(db: Database): Ringkasan {
   for (const p of db.potensi) naik(p.wilayahId, (x, id) => { x.potensi++; if (!id.startsWith("desa-")) x.potensiKat[p.kategori] = (x.potensiKat[p.kategori] ?? 0) + 1; });
   for (const a of db.aktor) if (a.level !== "perusahaan") naik(a.wilayahId, (x) => { x.aktor++; });
   for (const m of db.media) {
-    if (m.tanggal < batas) continue;
+    if (m.tanggal < batas || m.tipe !== "berita") continue;
     naik(m.wilayahId, (x, id) => {
       x.media30++;
       if (m.sentimen === "negatif") x.negatif30++;

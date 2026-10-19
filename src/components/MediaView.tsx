@@ -15,10 +15,12 @@ import { Donut, type Irisan } from "./Grafik";
 
 type Tab = "semua" | "berita" | "sosmed";
 
-export default function MediaView({ media, letupan, hari }: { media: Media[]; letupan: Record<Tab, { negatif: Letupan[]; positif: Letupan[] }>; hari: string }) {
+export default function MediaView({ media, letupan, hari, w }: { media: Media[]; letupan: Record<Tab, { negatif: Letupan[]; positif: Letupan[] }>; hari: string; w?: string }) {
   const [tab, setTab] = useState<Tab>("berita");
   const data = useMemo(() => (tab === "semua" ? media : media.filter((m) => m.tipe === tab)), [media, tab]);
   const b30 = geserHari(hari, -30);
+  // tautan ke halaman Berita membawa tab (jenis) dan wilayah yang sedang dilihat
+  const keBerita = (q: string) => `/berita?${[q, tab !== "semua" ? `tipe=${tab}` : "", w ? `w=${w}` : ""].filter(Boolean).join("&")}`;
   const d30 = useMemo(() => data.filter((m) => m.tanggal >= b30), [data, b30]);
   const r30 = ringkasSentimen(d30);
   const b60 = geserHari(hari, -60);
@@ -126,7 +128,7 @@ export default function MediaView({ media, letupan, hari }: { media: Media[]; le
           <ul className="space-y-3">
             {perIsu.map((i) => (
               <li key={i.isu}>
-                <Link href={`/berita?isu=${encodeURIComponent(i.isu)}`} className="block hover:text-accent">
+                <Link href={keBerita(`isu=${encodeURIComponent(i.isu)}&dari=${b30}`)} className="block hover:text-accent">
                   <span className="flex justify-between text-[13px]"><span>{i.isu}</span><b className="num">{i.total}</b></span>
                   <span className="mt-1 flex h-2 overflow-hidden rounded-full bg-[#eef2f6]" style={{ width: `${(i.total / Math.max(1, perIsu[0].total)) * 100}%` }}>
                     {(["negatif", "netral", "positif"] as const).map((s) => <span key={s} style={{ width: `${(i[s] / i.total) * 100}%`, background: s === "netral" ? "#ced4da" : WARNA_SENTIMEN[s] }} />)}
@@ -179,7 +181,7 @@ export default function MediaView({ media, letupan, hari }: { media: Media[]; le
         </Kartu>
       </div>
 
-      <Kartu judul="Berita terbaru" rapat aksi={<TautanKartu href={`/berita${tab === "sosmed" ? "?tipe=sosmed" : ""}`}>Buka halaman Berita</TautanKartu>}>
+      <Kartu judul="Berita terbaru" rapat aksi={<TautanKartu href={keBerita("")}>Buka halaman Berita</TautanKartu>}>
         <ul className="grid grid-cols-1 gap-px bg-[#eef2f6] lg:grid-cols-2 3xl:grid-cols-3">
           {data.slice(0, 12).map((m) => (
             <li key={m.id} className="bg-surface">

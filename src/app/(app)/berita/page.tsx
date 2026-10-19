@@ -8,7 +8,7 @@ import { ChipSentimen } from "@/components/ui";
 import { bacaDb } from "@/lib/db";
 import { ISU_MEDIA, warnaIsu, warnaSektorKonflik } from "@/lib/kategori";
 import { WARNA_SENTIMEN, geserHari, hariIni, persen, potong, ringkasSentimen, tanggal, tanggalPendek } from "@/lib/format";
-import { dalamWilayah, labelWilayah } from "@/lib/wilayah";
+import { cakupan, dalamWilayah, labelWilayah } from "@/lib/wilayah";
 import { deteksiLetupan } from "@/lib/letupan";
 import type { Sentimen } from "@/lib/types";
 
@@ -17,14 +17,18 @@ export const metadata = { title: "Berita & Informasi · Dashboard Potensi Ekonom
 
 const PER_HAL = 20;
 
-type Param = { q?: string; s?: string; isu?: string; tipe?: string; w?: string; hal?: string };
+type Param = { q?: string; s?: string; isu?: string; tipe?: string; w?: string; hal?: string; dari?: string; sampai?: string };
+const TGL = /^\d{4}-\d{2}-\d{2}$/;
 
 export default async function BeritaPage({ searchParams }: { searchParams: Promise<Param> }) {
   const sp = await searchParams;
   const db = await bacaDb();
   const q = (sp.q ?? "").trim().toLowerCase();
-  const semua = db.media.filter((m) => dalamWilayah(m.wilayahId, sp.w));
+  const c = cakupan(sp.w);
+  const semua = db.media.filter((m) => dalamWilayah(m.wilayahId, c.berita));
+  const dari = TGL.test(sp.dari ?? "") ? sp.dari : undefined, sampai = TGL.test(sp.sampai ?? "") ? sp.sampai : undefined;
   const hasil = semua.filter((m) => (!sp.tipe || m.tipe === sp.tipe) && (!sp.s || m.sentimen === sp.s) && (!sp.isu || m.isu === sp.isu)
+    && (!dari || m.tanggal >= dari) && (!sampai || m.tanggal <= sampai)
     && (!q || `${m.judul} ${m.ringkasan} ${m.sumber}`.toLowerCase().includes(q)));
   const hal = Math.max(1, Math.min(Math.ceil(hasil.length / PER_HAL) || 1, Number(sp.hal) || 1));
   const tampil = hasil.slice((hal - 1) * PER_HAL, hal * PER_HAL);
@@ -37,21 +41,21 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
   const r30 = ringkasSentimen(semua.filter((m) => m.tanggal >= b30));
   const letupan = [...deteksiLetupan(semua, "negatif", geserHari(hariIni(), -90), hariIni()), ...deteksiLetupan(semua, "positif", geserHari(hariIni(), -90), hariIni())]
     .sort((a, b) => (a.sampai < b.sampai ? 1 : -1)).slice(0, 4);
-  const konflik = db.konflik.filter((k) => dalamWilayah(k.wilayahId, sp.w)).sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1)).slice(0, 7);
+  const konflik = db.konflik.filter((k) => dalamWilayah(k.wilayahId, c.titik)).sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1)).slice(0, 7);
   const perIsu = ISU_MEDIA.map((i) => ({ i, n: semua.filter((m) => m.isu === i && m.tanggal >= b30).length })).filter((x) => x.n).sort((a, b) => b.n - a.n);
   const maksIsu = Math.max(1, ...perIsu.map((x) => x.n));
 
   return (
     <>
     <HeaderHalaman eyebrow={sp.w ? labelWilayah(sp.w) : "Seluruh Provinsi Riau"} judul="Berita"
-      keterangan="Berita online soal perusahaan dan isu di Riau, ditambah catatan yang ditulis tim.">
+      keterangan={c.catatan ?? "Berita online soal perusahaan dan isu di Riau, ditambah catatan yang ditulis tim."}>
       <form action="/berita" className="flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
         {Object.entries(sp).filter(([k, v]) => v && k !== "q" && k !== "hal").map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
         <label htmlFor="q" className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-sm backdrop-blur">
           <Search size={15} className="shrink-0 text-[#8fb8d8]" /><input id="q" name="q" defaultValue={sp.q} placeholder="Kata kunci" className="w-full min-w-0 bg-transparent text-white outline-none placeholder:text-white/50 sm:w-44" />
         </label>
         <button className="shrink-0 rounded-lg bg-[#4dabf7] px-3 py-1.5 text-sm font-semibold text-navy">Tampilkan</button>
-        {(sp.q || sp.s || sp.isu || sp.tipe) && <Link href={url({ q: undefined, s: undefined, isu: undefined, tipe: undefined })} aria-label="Hapus filter" className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/10"><X size={15} /></Link>}
+        {(sp.q || sp.s || sp.isu || sp.tipe || dari || sampai) && <Link href={url({ q: undefined, s: undefined, isu: undefined, tipe: undefined, dari: undefined, sampai: undefined })} aria-label="Hapus filter" className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/10"><X size={15} /></Link>}
       </form>
       <Suspense><WilayahFilter gelap penuh /></Suspense>
     </HeaderHalaman>
@@ -67,7 +71,12 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
             <span className="h-2 w-2 rounded-full" style={{ background: sp.s === s ? "#fff" : WARNA_SENTIMEN[s] }} />{s}
           </Link>
         ))}
-        {sp.isu && <Link href={url({ isu: undefined })} className="flex items-center gap-1 rounded-full bg-accent-soft px-3 py-1 text-accent">Isu: {sp.isu} <X size={13} /></Link>}
+        {sp.isu && <Link href={url({ isu: undefined })} className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-accent-soft px-3 py-1 text-accent">Isu: {sp.isu} <X size={13} /></Link>}
+        {(dari || sampai) && (
+          <Link href={url({ dari: undefined, sampai: undefined })} className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-accent-soft px-3 py-1 text-accent">
+            {dari && sampai ? (dari === sampai ? tanggal(dari) : `${tanggalPendek(dari)} – ${tanggal(sampai)}`) : dari ? `Sejak ${tanggal(dari)}` : `Sampai ${tanggal(sampai!)}`} <X size={13} />
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px] 3xl:grid-cols-[minmax(0,1fr)_400px]">
@@ -99,7 +108,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
         </section>
 
         <aside className="space-y-4">
-          <KartuSamping judul="Nada berita, 30 hari" aksi={<Link href="/media" className="text-[11px] font-semibold text-accent hover:underline">Lihat analitik</Link>}>
+          <KartuSamping judul="Nada berita, 30 hari" aksi={<Link href={`/media${sp.w ? `?w=${sp.w}` : ""}`} className="text-[11px] font-semibold text-accent hover:underline">Lihat analitik</Link>}>
             <div className="flex h-3 overflow-hidden rounded-full">
               {(["negatif", "netral", "positif"] as const).map((s) => <span key={s} style={{ width: `${(r30[s] / Math.max(1, r30.total)) * 100}%`, background: s === "netral" ? "#ced4da" : WARNA_SENTIMEN[s] }} />)}
             </div>
@@ -112,7 +121,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
               <ul className="space-y-2">
                 {letupan.map((l) => (
                   <li key={l.sentimen + l.dari} className="border-l-[3px] pl-2.5" style={{ borderColor: WARNA_SENTIMEN[l.sentimen] }}>
-                    <Link href={url({ isu: l.isu, s: l.sentimen })} className="text-[13px] font-semibold hover:text-accent">{l.isu}</Link>
+                    <Link href={url({ s: l.sentimen, dari: l.dari, sampai: l.sampai, isu: undefined, tipe: undefined, q: undefined })} className="text-[13px] font-semibold hover:text-accent">{l.isu}</Link>
                     <p className="text-[11px] text-muted">{l.jumlah} berita {l.sentimen} · {tanggalPendek(l.dari)}{l.dari !== l.sampai ? `–${tanggalPendek(l.sampai)}` : ""} · {labelWilayah(l.wilayahId)}</p>
                   </li>
                 ))}
@@ -122,13 +131,13 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           <KartuSamping judul="Topik 30 hari">
             <ul className="space-y-1.5">
               {perIsu.map(({ i, n }) => (
-                <li key={i}><Link href={url({ isu: i })} className="grid grid-cols-[118px_1fr_26px] items-center gap-2 text-xs hover:text-accent">
+                <li key={i}><Link href={url({ isu: i, dari: b30, sampai: undefined, s: undefined, tipe: undefined, q: undefined })} className="grid grid-cols-[118px_1fr_26px] items-center gap-2 text-xs hover:text-accent">
                   <span className="truncate">{i}</span><span className="h-2 rounded-full bg-bg"><span className="block h-full rounded-full" style={{ width: `${(n / maksIsu) * 100}%`, background: warnaIsu(i) }} /></span><b className="num text-right">{n}</b>
                 </Link></li>
               ))}
             </ul>
           </KartuSamping>
-          <KartuSamping judul="Kasus konflik terbaru" aksi={<Link href="/peta/konflik" className="text-[11px] font-semibold text-accent hover:underline">Buka peta</Link>}>
+          <KartuSamping judul="Kasus konflik terbaru" aksi={<Link href={`/peta/konflik${c.titik ? `?w=${c.titik}` : ""}`} className="text-[11px] font-semibold text-accent hover:underline">Buka peta</Link>}>
             <ul className="space-y-2">
               {konflik.map((k) => (
                 <li key={k.id}><Link href={`/konflik/${encodeURIComponent(k.id)}`} className="group flex gap-2">

@@ -243,7 +243,7 @@ export default function PetaTematik({ tema, titik, ringkasan, opsi, fokus, ringk
       {ringkas ? (
         <>
           <div className="absolute bottom-3 left-3 z-10 rounded-md bg-surface/95 px-2.5 py-1.5 text-xs shadow-lg"><b className="num">{tersaring.length}</b> {JUDUL[tema].titik}</div>
-          <Link href={`/peta/${tema}`} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-md bg-surface px-3 py-1.5 text-sm font-semibold text-ink shadow-lg hover:bg-accent-soft">
+          <Link href={`/peta/${tema}${fokus ? `?w=${fokus}` : ""}`} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-md bg-surface px-3 py-1.5 text-sm font-semibold text-ink shadow-lg hover:bg-accent-soft">
             <Maximize2 size={14} /> Buka peta penuh
           </Link>
         </>

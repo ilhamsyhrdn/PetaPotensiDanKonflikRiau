@@ -13,7 +13,7 @@ import { hitungRingkasan, ringkasanPoligon } from "@/lib/ringkasan";
 import { sorotanPotensi } from "@/lib/narasi";
 import { KATEGORI_POTENSI, STATUS_KONFLIK, kategoriPotensi, konflikAktif, warnaSektorKonflik, warnaStatus } from "@/lib/kategori";
 import { WARNA_SENTIMEN, geserHari, hariIni, indeksSentimen, ringkasSentimen, tanggal, tanggalPendek } from "@/lib/format";
-import { DESA_STUDI, KABUPATEN, KAB_STUDI, anak, dalamWilayah, getWilayah, labelWilayah, namaLengkap, namaWilayah, rantai } from "@/lib/wilayah";
+import { DESA_STUDI, KABUPATEN, KAB_STUDI, anak, cakupan, dalamWilayah, getWilayah, labelWilayah, namaLengkap, namaWilayah, rantai } from "@/lib/wilayah";
 import { opsiKonflik, opsiPotensi, titikKonflik, titikPotensi } from "@/lib/titik";
 import type { Konflik } from "@/lib/types";
 import { terkumpul } from "@/lib/baseline";
@@ -52,8 +52,12 @@ function perusahaanTeratas(konflik: Konflik[], maks = 7) {
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ w?: string }> }) {
   const { w } = await searchParams;
   const db = await bacaDb();
-  const di = <T extends { wilayahId: string }>(xs: T[]) => xs.filter((x) => dalamWilayah(x.wilayahId, w));
-  const konflik = di(db.konflik), potensi = di(db.potensi), media = di(db.media);
+  const c = cakupan(w);
+  const di = <T extends { wilayahId: string }>(xs: T[], id?: string) => xs.filter((x) => dalamWilayah(x.wilayahId, id));
+  const konflik = di(db.konflik, c.titik), potensi = di(db.potensi, c.titik), media = di(db.media, c.berita);
+  // tautan keluar membawa fokus yang sama dengan angkanya; peta memakai cakupan data supaya area yang tampil cocok
+  const kePeta = (tema: "konflik" | "potensi") => `/peta/${tema}${c.titik ? `?w=${c.titik}` : ""}`;
+  const keHal = (href: string) => (w ? `${href}${href.includes("?") ? "&" : "?"}w=${w}` : href);
   const berita = media.filter((m) => m.tipe === "berita");
   const ringkasan = hitungRingkasan(db);
   const hari = hariIni();
@@ -63,6 +67,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   // ---- angka berita
   const b30 = geserHari(hari, -30), b60 = geserHari(hari, -60);
+  // angka berita di halaman ini = berita online 30 hari terakhir, jadi tautannya membawa filter yang sama
+  const keBerita = (q = "") => keHal(`/berita?tipe=berita&dari=${b30}${q}`);
   const r30 = ringkasSentimen(berita.filter((m) => m.tanggal >= b30));
   const rLalu = ringkasSentimen(berita.filter((m) => m.tanggal >= b60 && m.tanggal < b30));
   const neg30 = pct(r30.negatif, r30.total), negLalu = pct(rLalu.negatif, rLalu.total);
@@ -117,7 +123,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const studiTeratas = [...studiBaris].sort((a, b) => b.konflik - a.konflik)[0];
 
   // ---- pemberitaan
-  const sentimenData: Irisan[] = (["negatif", "netral", "positif"] as const).map((s) => ({ label: s[0].toUpperCase() + s.slice(1), nilai: r30[s], warna: s === "netral" ? "#adb5bd" : WARNA_SENTIMEN[s], href: `/berita?s=${s}` }));
+  const sentimenData: Irisan[] = (["negatif", "netral", "positif"] as const).map((s) => ({ label: s[0].toUpperCase() + s.slice(1), nilai: r30[s], warna: s === "netral" ? "#adb5bd" : WARNA_SENTIMEN[s], href: keBerita(`&s=${s}`) }));
   const isuNeg = urut(hitung(berita.filter((m) => m.tanggal >= b30 && m.sentimen === "negatif" && m.isu !== "Lainnya"), (m) => m.isu)).slice(0, 6);
   const isuPos = urut(hitung(berita.filter((m) => m.tanggal >= b30 && m.sentimen === "positif" && m.isu !== "Lainnya"), (m) => m.isu)).slice(0, 6);
 
@@ -135,15 +141,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     teks: <>Sektor <b>{sektorJelas[0][0].toLowerCase()}</b> paling sering memicu konflik, {sektorJelas[0][1]} kasus.{jenis1 ? <> Bentuknya {nJenis1! > konflik.length / 2 ? "kebanyakan" : "paling sering"} {jenis1.toLowerCase()}.</> : null}</>,
   });
   if (konflik.length) sekilas.push({
-    ikon: Activity, warna: "#e03131", href: "/peta/konflik",
+    ikon: Activity, warna: "#e03131", href: kePeta("konflik"),
     teks: <><b>{belum} kasus</b> belum ditangani sama sekali, dan {perStatus["Dalam proses"] ?? 0} lainnya masih diproses.</>,
   });
   if (r30.total) sekilas.push({
-    ikon: Newspaper, warna: "#7a58a3", href: "/media",
+    ikon: Newspaper, warna: "#7a58a3", href: keHal("/media"),
     teks: <>Bulan ini ada {r30.total} berita, <b>{neg30}% bernada negatif</b>{rLalu.total ? (selisihNeg ? ` (${selisihNeg > 0 ? "naik" : "turun"} ${Math.abs(selisihNeg)} poin dari bulan lalu)` : " (sama seperti bulan lalu)") : null}.{isuNeg[0] ? <> Keluhan paling banyak soal {isuNeg[0][0].toLowerCase()}.</> : null}</>,
   });
   if (kat1) sekilas.push({
-    ikon: Gem, warna: "#2f6690", href: "/peta/potensi",
+    ikon: Gem, warna: "#2f6690", href: kePeta("potensi"),
     teks: <>Dari {ribuan(potensi.length)} titik potensi ekonomi, yang paling banyak <b>{kategoriPotensi(kat1).nama.toLowerCase()}</b> ({ribuan(nKat1!)} titik).</>,
   });
 
@@ -205,7 +211,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <HeroRiau
         label={fokus ? `Sedang melihat ${labelWilayah(fokus.id)}` : `Data terakhir diperbarui ${tanggal(new Date(Date.parse(db.meta?.dimuat ?? hari) + 7 * 36e5).toISOString())}`}
         judul={fokus ? `Konflik & potensi ekonomi di ${namaLengkap(fokus)}` : "Konflik & potensi ekonomi di Riau"}
-        keterangan={fokus ? "Semua angka dan peta di halaman ini sudah difilter ke daerah ini saja." : "Pantau titik konflik, sebaran usaha, dan nada pemberitaan tentang perusahaan di 12 kabupaten/kota. Pilih daerah untuk melihat lebih dekat."}
+        keterangan={fokus ? c.catatan ?? "Semua angka dan peta di halaman ini sudah difilter ke daerah ini saja." : "Pantau titik konflik, sebaran usaha, dan nada pemberitaan tentang perusahaan di 12 kabupaten/kota. Pilih daerah untuk melihat lebih dekat."}
+        wilayah={c.titik}
         konflik={unik(konflik.map((k) => bulat(k.koordinat)))}
         potensi={unik(potensi.map((p) => bulat(p.koordinat)))}
         aksi={<Suspense><WilayahFilter gelap penuh /></Suspense>}
@@ -231,16 +238,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       <div className="mx-auto max-w-[2400px] px-4 pb-10 sm:px-6 2xl:px-10">
         <div className="relative z-10 -mt-16 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
-          <KartuAngka label="Konflik tercatat" nilai={konflik.length} ikon={AlertTriangle} warna="#c2410c" tren={konflikPerBulan} href="/peta/konflik"
+          <KartuAngka label="Konflik tercatat" nilai={konflik.length} ikon={AlertTriangle} warna="#c2410c" tren={konflikPerBulan} href={kePeta("konflik")}
             ket={`${konflik.filter((k) => k.asal === "TanahKita").length} dari data sekunder, ${konflik.filter((k) => k.asal === "Berita").length} dari berita`} />
-          <KartuAngka label="Masih berjalan" nilai={aktif} ikon={Activity} warna="#e8590c" href="/peta/konflik" komposisi={statusData}
+          <KartuAngka label="Masih berjalan" nilai={aktif} ikon={Activity} warna="#e8590c" href={kePeta("konflik")} komposisi={statusData}
             ket={`${belum} belum ditangani, ${perStatus["Dalam proses"] ?? 0} sedang diproses`} />
-          <KartuAngka label="Titik potensi ekonomi" nilai={potensi.length} ikon={Gem} warna="#2f6690" href="/peta/potensi" komposisi={katData}
+          <KartuAngka label="Titik potensi ekonomi" nilai={potensi.length} ikon={Gem} warna="#2f6690" href={kePeta("potensi")} komposisi={katData}
             ket={`Tersebar di ${Object.keys(perKat).length} lapangan usaha`} />
-          <KartuAngka label="Berita 30 hari terakhir" nilai={r30.total} ikon={Newspaper} warna="#7a58a3" href="/berita" tren={tren.map((t) => t.positif + t.netral + t.negatif)}
+          <KartuAngka label="Berita 30 hari terakhir" nilai={r30.total} ikon={Newspaper} warna="#7a58a3" href={keBerita()} tren={tren.map((t) => t.positif + t.netral + t.negatif)}
             delta={rLalu.total ? { teks: `${ubahVolume > 0 ? "+" : ""}${ubahVolume}%`, arah: ubahVolume > 0 ? "naik" : ubahVolume < 0 ? "turun" : "tetap" } : undefined}
             ket={`Bulan sebelumnya ${rLalu.total} berita`} />
-          <KartuAngka label="Berita bernada negatif" nilai={neg30} akhiran="%" ikon={ThumbsDown} warna="#e03131" href="/media"
+          <KartuAngka label="Berita bernada negatif" nilai={neg30} akhiran="%" ikon={ThumbsDown} warna="#e03131" href={keHal("/media")}
             tren={tren.map((t) => pct(t.negatif, t.positif + t.netral + t.negatif))}
             delta={rLalu.total ? { teks: `${Math.abs(selisihNeg)} poin`, arah: selisihNeg > 0 ? "naik" : selisihNeg < 0 ? "turun" : "tetap", baik: selisihNeg < 0 } : undefined}
             ket="Dibanding 30 hari sebelumnya" />
@@ -251,8 +258,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         {/* SEKILAS */}
         <div id="sekilas" className="grid scroll-mt-[calc(var(--tinggi-nav)+64px)] gap-4 pt-5 xl:grid-cols-[1.55fr_1fr]">
           <Kartu judul="Peta sebaran" sub="Klik titik untuk lihat detailnya. Makin diperbesar, makin rinci sampai tingkat desa." rapat className="muncul-gulir h-[460px] overflow-hidden sm:h-[540px]"
-            aksi={<span className="flex"><TautanKartu href="/peta/konflik" warna="#c2410c">Peta konflik</TautanKartu><TautanKartu href="/peta/potensi">Peta potensi</TautanKartu></span>}>
-            <PetaDashboard data={titikData} ringkasan={ringkasanPoligon(ringkasan)} fokus={w} />
+            aksi={<span className="flex"><TautanKartu href={kePeta("konflik")} warna="#c2410c">Peta konflik</TautanKartu><TautanKartu href={kePeta("potensi")}>Peta potensi</TautanKartu></span>}>
+            <PetaDashboard data={titikData} ringkasan={ringkasanPoligon(ringkasan)} fokus={c.titik} />
           </Kartu>
           <Kartu judul="Yang perlu diketahui" sub="Diringkas otomatis dari data yang ada sekarang." className="muncul-gulir">
             <ul className="space-y-1">
@@ -273,7 +280,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         {/* KONFLIK */}
-        <JudulSeksi id="konflik" ikon={AlertTriangle} warna="#c2410c" judul="Konflik" sub={`${konflik.length} kasus dari data sekunder dan berita online`} aksi={<TautanKartu href="/peta/konflik" warna="#c2410c">Buka peta konflik</TautanKartu>} />
+        <JudulSeksi id="konflik" ikon={AlertTriangle} warna="#c2410c" judul="Konflik" sub={`${konflik.length} kasus dari data sekunder dan berita online`} aksi={<TautanKartu href={kePeta("konflik")} warna="#c2410c">Buka peta konflik</TautanKartu>} />
         <div className="mt-4 grid gap-4 lg:grid-cols-2 3xl:grid-cols-4">
           <Kartu judul="Status penanganan" sub="Sudah sejauh mana kasusnya ditangani" className="muncul-gulir"
             info="Status kasus dari berita dibaca otomatis dari isi artikel. Tetap perlu dicek ke lapangan.">
@@ -307,7 +314,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             ) : <p className="p-5 text-sm text-muted">Belum ada kasus yang menyebut nama perusahaan.</p>}
           </Kartu>
         </div>
-        <Kartu judul="Kasus terbaru" rapat className="muncul-gulir mt-4 overflow-hidden" aksi={<TautanKartu href="/peta/konflik">Semua kasus</TautanKartu>}>
+        <Kartu judul="Kasus terbaru" rapat className="muncul-gulir mt-4 overflow-hidden" aksi={<TautanKartu href={kePeta("konflik")}>Semua kasus</TautanKartu>}>
           <ul className="grid gap-px bg-[#eef2f6] lg:grid-cols-2 3xl:grid-cols-3">
             {konflikBaru.map((k) => (
               <li key={k.id} className="bg-surface">
@@ -324,7 +331,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </Kartu>
 
         {/* POTENSI */}
-        <JudulSeksi id="potensi" ikon={Gem} warna="#2f6690" judul="Potensi ekonomi" sub={`${ribuan(potensi.length)} sarana usaha dari OpenStreetMap, dikelompokkan menurut kategori BPS`} aksi={<TautanKartu href="/peta/potensi">Buka peta potensi</TautanKartu>} />
+        <JudulSeksi id="potensi" ikon={Gem} warna="#2f6690" judul="Potensi ekonomi" sub={`${ribuan(potensi.length)} sarana usaha dari OpenStreetMap, dikelompokkan menurut kategori BPS`} aksi={<TautanKartu href={kePeta("potensi")}>Buka peta potensi</TautanKartu>} />
         <div className="mt-4 grid gap-4 lg:grid-cols-2 3xl:grid-cols-3">
           <Kartu judul="Lapangan usaha" sub="Jenis kegiatan ekonominya" className="muncul-gulir"
             info="Pengelompokan mengikuti Klasifikasi Baku Lapangan Usaha Indonesia (KBLI) dari BPS.">
@@ -358,7 +365,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         {/* PEMBERITAAN */}
-        <JudulSeksi id="media" ikon={Newspaper} warna="#7a58a3" judul="Pemberitaan" sub="Berita online tentang perusahaan dan isu di Riau" aksi={<TautanKartu href="/media" warna="#7a58a3">Analitik lengkap</TautanKartu>} />
+        <JudulSeksi id="media" ikon={Newspaper} warna="#7a58a3" judul="Pemberitaan" sub="Berita online tentang perusahaan dan isu di Riau" aksi={<TautanKartu href={keHal("/media")} warna="#7a58a3">Analitik lengkap</TautanKartu>} />
         <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.6fr] 3xl:grid-cols-[1fr_1.8fr_1fr]">
           <Kartu judul="Nada berita bulan ini" sub="30 hari terakhir" className="muncul-gulir"
             info="Indeks nada = persen berita positif dikurangi persen berita negatif. Di bawah nol artinya kabar buruk lebih banyak. Nada dibaca otomatis dari judul berita.">
@@ -372,14 +379,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <Kartu judul="Isu yang dibahas" sub="Topik di berita negatif dan positif bulan ini" className="muncul-gulir">
             <p className="mb-2.5 flex items-center gap-1.5 text-[12.5px] font-semibold text-[#e03131]"><span className="h-2 w-2 rounded-full bg-[#e03131]" />Di berita negatif</p>
             {isuNeg.length
-              ? <BarHorizontal lebarLabel={160} data={isuNeg.slice(0, 5).map(([l, n]) => ({ label: l, nilai: n, warna: "#e03131", href: `/berita?s=negatif&isu=${encodeURIComponent(l)}` }))} />
+              ? <BarHorizontal lebarLabel={160} data={isuNeg.slice(0, 5).map(([l, n]) => ({ label: l, nilai: n, warna: "#e03131", href: keBerita(`&s=negatif&isu=${encodeURIComponent(l)}`) }))} />
               : <p className="text-sm text-muted">Tidak ada berita negatif.</p>}
             <p className="mb-2.5 mt-5 flex items-center gap-1.5 text-[12.5px] font-semibold text-[#2f9e44]"><span className="h-2 w-2 rounded-full bg-[#2f9e44]" />Di berita positif</p>
             {isuPos.length
-              ? <BarHorizontal lebarLabel={160} data={isuPos.slice(0, 5).map(([l, n]) => ({ label: l, nilai: n, warna: "#2f9e44", href: `/berita?s=positif&isu=${encodeURIComponent(l)}` }))} />
+              ? <BarHorizontal lebarLabel={160} data={isuPos.slice(0, 5).map(([l, n]) => ({ label: l, nilai: n, warna: "#2f9e44", href: keBerita(`&s=positif&isu=${encodeURIComponent(l)}`) }))} />
               : <p className="text-sm text-muted">Tidak ada berita positif.</p>}
           </Kartu>
-          <Kartu judul="Berita terbaru" rapat className="muncul-gulir overflow-hidden 3xl:col-span-3" aksi={<TautanKartu href="/berita">Semua berita</TautanKartu>}>
+          <Kartu judul="Berita terbaru" rapat className="muncul-gulir overflow-hidden 3xl:col-span-3" aksi={<TautanKartu href={keHal("/berita")}>Semua berita</TautanKartu>}>
             <ul className="grid flex-1 gap-px bg-[#eef2f6] 3xl:grid-cols-3">
               {berita.slice(0, 6).map((m) => (
                 <li key={m.id} className="bg-surface">

@@ -137,9 +137,12 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
       {/* Menu HP lewat portal ke body: backdrop-filter header akan menjadi containing block bagi elemen fixed */}
       {terpasang && createPortal(
         <div id="menu-hp" data-buka={menuHp} inert={!menuHp}
-          className="menu-hp fixed inset-x-0 bottom-0 top-[var(--tinggi-nav)] z-40 overflow-y-auto overscroll-contain bg-navy px-4 pb-8 pt-3 text-white lg:hidden">
-          <div aria-hidden className="pola-grid pointer-events-none absolute inset-0" />
-          <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgb(77_171_247/0.22),transparent_65%)]" />
+          className="menu-hp fixed inset-x-0 bottom-0 top-[var(--tinggi-nav)] z-40 touch-pan-y overflow-y-auto overflow-x-hidden overscroll-contain bg-navy px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-3 text-white lg:hidden">
+          {/* dekorasi dibungkus overflow-hidden supaya tidak membuat panel lebih lebar dari layar */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="pola-grid absolute inset-0" />
+            <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgb(77_171_247/0.22),transparent_65%)]" />
+          </div>
           <nav aria-label="Menu utama" className="relative space-y-4">
             {MENU.map((g) => "anak" in g ? (
               <div key={g.label}>

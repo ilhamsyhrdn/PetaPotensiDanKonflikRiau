@@ -78,3 +78,18 @@ export const labelWilayah = (id: string) => {
 };
 
 export const namaWilayah = (id: string) => getWilayah(id)?.nama ?? id;
+
+/**
+ * Wilayah yang dipakai menyaring data untuk fokus `id`. Batas desa belum ada dan berita jarang menyebut desa,
+ * jadi fokus desa memakai kecamatannya untuk konflik & potensi dan kabupatennya untuk berita, sama dengan
+ * tabel "Sekitar desa studi". Pakai fungsi ini di setiap halaman yang menyaring dengan ?w=.
+ */
+export function cakupan(id?: string | null): { titik?: string; berita?: string; catatan?: string } {
+  const w = getWilayah(id);
+  if (!w || w.level !== "desa") return { titik: id || undefined, berita: id || undefined };
+  const [kab, kec] = rantai(w.id);
+  return {
+    titik: kec?.id ?? kab?.id, berita: kab?.id,
+    catatan: `Batas desa belum tersedia, jadi konflik dan potensi dihitung se-${namaLengkap(kec ?? kab)}, berita se-${namaLengkap(kab)}.`,
+  };
+}
