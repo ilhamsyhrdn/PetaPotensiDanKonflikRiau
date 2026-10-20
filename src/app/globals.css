@@ -74,6 +74,13 @@ body {
   background-size: 320px 320px, 420px 420px;
 }
 
+/* Pola titik halus untuk latar halaman masuk */
+.pola-titik {
+  background-image: radial-gradient(rgb(47 102 144 / 0.16) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 50%, #000 35%, transparent 85%);
+}
+
 /* Popup peta */
 .maplibregl-popup-content { border-radius: 14px !important; padding: 12px 14px !important; box-shadow: 0 8px 28px rgb(20 34 48 / 0.22) !important; font-family: var(--font-sans); color: var(--color-ink); max-width: min(320px, calc(100vw - 32px)); }
 .maplibregl-popup-close-button { font-size: 18px; padding: 2px 8px; color: var(--color-muted); }
