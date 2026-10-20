@@ -40,6 +40,7 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
   const [tergulir, setTergulir] = useState(false);
   const [terpasang, setTerpasang] = useState(false);
   const wadah = useRef<HTMLElement>(null);
+  const jedaTutup = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const aktif = (i: Item) => (i.href === "/" ? path === "/" : (i.cocok ?? [i.href]).some((c) => path.startsWith(c)));
   const grupAktif = (g: Grup) => ("anak" in g ? g.anak.some(aktif) : aktif(g));
@@ -108,17 +109,34 @@ export default function TopNav({ sesi }: { sesi: Sesi }) {
           <TombolPerbarui />
         </nav>
 
-        {/* Pengguna (desktop) */}
-        <div className="relative ml-auto hidden lg:block" onMouseLeave={() => buka === "pengguna" && setBuka(null)}>
-          <button onClick={() => setBuka(buka === "pengguna" ? null : "pengguna")} aria-expanded={buka === "pengguna"} className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 hover:bg-white/10">
+        {/* Pengguna (desktop). Panel menempel ke tombol lewat padding (bukan margin) supaya tidak ada celah
+            yang membuat menu tertutup saat kursor bergerak ke "Keluar"; penutupan juga diberi jeda singkat. */}
+        <div className="relative ml-auto hidden lg:block" onMouseEnter={() => clearTimeout(jedaTutup.current)}
+          onMouseLeave={() => { if (buka === "pengguna") jedaTutup.current = setTimeout(() => setBuka((b) => (b === "pengguna" ? null : b)), 250); }}>
+          <button onClick={() => setBuka(buka === "pengguna" ? null : "pengguna")} aria-expanded={buka === "pengguna"} aria-haspopup="true"
+            className={`flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors hover:bg-white/10 ${buka === "pengguna" ? "bg-white/10" : ""}`}>
             <span className="grid h-8 w-8 place-items-center rounded-full bg-[#4dabf7] text-xs font-bold text-navy">{inisial}</span>
             <span className="hidden text-left leading-tight xl:block"><span className="block text-[13px] font-semibold">{sesi.nama}</span><span className="block text-[10.5px] text-white/55">{LABEL_PERAN[sesi.peran]}</span></span>
-            <ChevronDown size={14} className="text-white/60" />
+            <ChevronDown size={14} className={`text-white/60 transition-transform ${buka === "pengguna" ? "rotate-180" : ""}`} />
           </button>
           {buka === "pengguna" && (
-            <div className="anim-turun absolute right-0 top-full mt-1 w-56 rounded-xl border border-line bg-surface p-1.5 text-ink shadow-2xl">
-              <p className="px-3 py-2 text-xs text-muted">Masuk sebagai <b className="text-ink">{sesi.username}</b> ({LABEL_PERAN[sesi.peran]})</p>
-              <form action="/api/auth/logout" method="post"><button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg"><LogOut size={15} /> Keluar</button></form>
+            <div className="absolute right-0 top-full pt-2">
+              <div className="anim-turun w-64 overflow-hidden rounded-2xl border border-line bg-surface text-ink shadow-[0_18px_40px_-12px_rgb(10_20_30/0.35)]">
+                <div className="flex items-center gap-3 px-4 py-3.5">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#4dabf7] text-sm font-bold text-navy">{inisial}</span>
+                  <span className="min-w-0 leading-tight">
+                    <span className="block truncate text-sm font-semibold">{sesi.nama}</span>
+                    <span className="mt-0.5 block truncate text-xs text-muted">@{sesi.username} · {LABEL_PERAN[sesi.peran]}</span>
+                  </span>
+                </div>
+                <div className="border-t border-line p-1.5">
+                  <form action="/api/auth/logout" method="post">
+                    <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-neg transition-colors hover:bg-neg/10">
+                      <LogOut size={16} /> Keluar
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
           )}
         </div>
