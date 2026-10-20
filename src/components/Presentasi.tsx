@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Expand, Pause, Play, X } from "lucide-react";
 import type { Media } from "@/lib/types";

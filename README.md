@@ -11,16 +11,22 @@ npm run dev
 ```
 
 Buka http://localhost:3000 lalu masuk. Ada tiga peran: `admin` (semua akses, termasuk memuat ulang data sumber),
-`editor` (tambah, ubah, hapus data), dan `viewer` (hanya melihat). Password bawaan ada di `src/lib/auth.ts` dan berlaku juga di produksi.
+`editor` (tambah, ubah, hapus data), dan `viewer` (hanya melihat). Password bawaan di `src/lib/auth.ts` **hanya berlaku
+di `npm run dev`**, karena repo ini publik.
 
-Untuk mengganti password bawaan, isi variabel lingkungan berikut di hosting (nilai env selalu menang):
+Di produksi (hosting), isi variabel lingkungan berikut. Akun yang password-nya tidak diisi tidak bisa dipakai masuk:
 
 | Variabel | Isi |
 |---|---|
-| `AUTH_SECRET` | String acak panjang untuk menandatangani sesi (mis. hasil `openssl rand -base64 32`) |
-| `PASSWORD_ADMIN` | Password akun `admin` |
-| `PASSWORD_EDITOR` | Password akun `editor` |
-| `PASSWORD_VIEWER` | Password akun `viewer` |
+| `PASSWORD_ADMIN` | Password akun `admin` (wajib; minimal 12 karakter, jangan dipakai di tempat lain) |
+| `PASSWORD_EDITOR` | Password akun `editor` (kosongkan bila akun ini tidak dipakai) |
+| `PASSWORD_VIEWER` | Password akun `viewer` (kosongkan bila akun ini tidak dipakai) |
+| `AUTH_SECRET` | Disarankan. String acak panjang untuk menandatangani sesi (mis. hasil `openssl rand -base64 32`). Tanpa ini dipakai kunci acak per build, sehingga semua pengguna harus masuk lagi setiap deploy |
+
+**Keamanan yang sudah dipasang:** percobaan masuk dibatasi 8 kali gagal per 15 menit per alamat IP; header keamanan
+(anti-clickjacking, `nosniff`, HSTS, dll.) di `next.config.ts`; unggahan diperiksa dari isi berkas, bukan tipe kiriman;
+`npm audit` bersih. Lint memakai `typescript-eslint` + `react-hooks` (bukan `eslint-config-next`, yang menarik paket
+`braces` berkerentanan tanpa versi perbaikan).
 
 Butuh koneksi internet untuk citra satelit, peta jalan, dan font label peta.
 

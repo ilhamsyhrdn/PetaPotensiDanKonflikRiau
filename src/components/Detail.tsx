@@ -107,7 +107,6 @@ export function BeritaMini({ list }: { list: Media[] }) {
 /** Gambar berita; bila tidak ada, tampilkan kartu pengganti dengan inisial media dan warna isu. */
 export function Gambar({ media, className = "" }: { media: Pick<Media, "gambar" | "sumber" | "isu" | "tipe">; className?: string }) {
   if (media.gambar) {
-    // eslint-disable-next-line @next/next/no-img-element
     return <img src={media.gambar} alt="" loading="lazy" referrerPolicy="no-referrer" className={`bg-bg object-cover ${className}`} />;
   }
   const inisial = media.sumber.replace(/^(www\.)/, "").split(/[\s.·-]+/).filter(Boolean).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("");

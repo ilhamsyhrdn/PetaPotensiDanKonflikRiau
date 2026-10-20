@@ -315,7 +315,6 @@ function PilihGambar({ id, nilai, ubah, setSibuk }: { id: string; nilai: string;
   return (
     <div className="flex gap-3">
       <div className="grid h-20 w-28 shrink-0 place-items-center overflow-hidden rounded-md border border-dashed border-line bg-bg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         {nilai ? <img src={nilai} alt="Pratinjau gambar" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : <ImagePlus size={22} className="text-muted" />}
       </div>
       <div className="min-w-0 flex-1 space-y-1.5">

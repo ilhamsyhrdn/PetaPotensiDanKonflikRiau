@@ -23,7 +23,8 @@ export default function LoginForm({ lanjut }: { lanjut?: string }) {
       body: JSON.stringify({ username: form.get("username"), password: form.get("password") }),
     });
     if (res.ok) {
-      window.location.href = lanjut && lanjut.startsWith("/") ? lanjut : "/";
+      // hanya alamat di situs ini; "//situs-lain.com" atau "/\situs-lain.com" akan dibuka peramban sebagai situs luar
+      window.location.href = lanjut && /^\/(?![/\\])/.test(lanjut) ? lanjut : "/";
       return;
     }
     const data = await res.json().catch(() => ({}));

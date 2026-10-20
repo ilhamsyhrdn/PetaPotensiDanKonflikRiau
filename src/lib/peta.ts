@@ -2,11 +2,14 @@
  * Bagian peta yang dipakai bersama oleh Peta Konflik, Peta Potensi, Dashboard, detail, dan Mode Presentasi.
  * Hanya untuk komponen klien (butuh maplibre-gl & canvas).
  */
-import type maplibregl from "maplibre-gl";
-import type { ExpressionSpecification, StyleSpecification } from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
+import { setWorkerUrl, type ExpressionSpecification, type StyleSpecification } from "maplibre-gl";
 import type { AngkaWilayah, Ringkasan } from "./ringkasan";
 import { tanggal } from "./format";
 import { DESA_STUDI, labelWilayah } from "./wilayah";
+
+// maplibre-gl 6 memuat worker dari berkas terpisah; pola new URL(..., import.meta.url) membuat Next.js menyalinnya sebagai aset
+setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString());
 
 export type Tema = "konflik" | "potensi";
 export type Basemap = "satelit" | "jalan";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import Link from "next/link";
 import { BarChart3, ChevronRight, Layers, Maximize2, Search, SlidersHorizontal, X } from "lucide-react";
 import {
